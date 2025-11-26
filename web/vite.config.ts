@@ -8,16 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: [
-      {
-        find: /^@\/(.*)$/,
-        replacement: path.resolve(__dirname, "src/$1"),
-      },
-      {
-        find: "@carbon-tracker/shared-types",
-        replacement: path.resolve(__dirname, "../packages/shared-types/src"),
-      },
-    ],
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@carbon-tracker/shared-types": path.resolve(__dirname, "../packages/shared-types/src"),
+    },
     extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".mts", ".json"],
   },
   build: {

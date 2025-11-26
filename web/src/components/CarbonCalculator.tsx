@@ -268,7 +268,7 @@ export default function CarbonCalculator() {
       }
 
       // Use api directly to handle response properly
-      const { api } = await import("@/lib/api.ts");
+      const { api } = await import("@/lib/api");
       const response = await api.post("/api/v1/carbon/logs", requestData);
       
       // API returns: { success: true, data: {...}, points_awarded: X, user_stats: {...} }
@@ -299,7 +299,7 @@ export default function CarbonCalculator() {
       // Fetch daily tip if not already set
       if (!dailyTip) {
         try {
-          const { api } = await import("@/lib/api.ts");
+          const { api } = await import("@/lib/api");
           const tipResponse = await api.get("/api/v1/carbon/suggestions/daily-tip");
           if (tipResponse.data?.success && tipResponse.data?.data?.tip) {
             setDailyTip(tipResponse.data.data.tip);

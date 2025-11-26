@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 // Using simple state-based tabs instead
 import { Badge } from "@/components/ui/badge";
-import { api } from "@/lib/api.ts";
+import { api } from "@/lib/api";
 import { Award, Target, MapPin, Trash2, Plus } from "lucide-react";
 // Simple toast implementation
 const showToast = (title: string, description?: string) => {

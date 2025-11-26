@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { api } from "@/lib/api.ts";
+import { api } from "@/lib/api";
 import { Users, TrendingUp, Award, MapPin, Activity, Shield, BarChart3, Search, Trash2, UserCheck, UserX, Target, Plus, X, FileText, AlertCircle } from "lucide-react";
 
 interface AdminStats {
