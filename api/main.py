@@ -20,12 +20,28 @@ app = FastAPI(
 )
 
 # CORS middleware
+# Ensure CORS_ORIGINS is always a list
+cors_origins = settings.CORS_ORIGINS
+if not isinstance(cors_origins, list):
+    cors_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
+
+# Add Netlify URL if not already present
+netlify_url = "https://personalcarbontracker.netlify.app"
+if netlify_url not in cors_origins:
+    cors_origins.append(netlify_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Register routers
