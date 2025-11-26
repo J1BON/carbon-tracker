@@ -3,9 +3,9 @@ Configuration settings for the Carbon Tracker API
 """
 
 from pydantic_settings import BaseSettings
+from pydantic import field_validator, Field
 from typing import List
 import json
-import os
 
 
 class Settings(BaseSettings):
@@ -14,13 +14,16 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     DEBUG: bool = False
     
-    # CORS - Parse from JSON string if provided, otherwise use defaults
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-    ]
+    # CORS - Parse from JSON string, comma-separated string, or use defaults
+    CORS_ORIGINS: List[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ],
+        description="CORS allowed origins"
+    )
     
     # Database
     # Supports both PostgreSQL and SQLite
@@ -53,18 +56,32 @@ class Settings(BaseSettings):
     # Carbon calculation settings
     DEFAULT_WEIGHT_AVERAGE: float = 70.0  # kg
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Parse CORS_ORIGINS from JSON string if it's a string
-        cors_origins = os.getenv("CORS_ORIGINS", "")
-        if cors_origins:
-            try:
-                # Try to parse as JSON array
-                self.CORS_ORIGINS = json.loads(cors_origins)
-            except (json.JSONDecodeError, TypeError):
-                # If not JSON, try comma-separated
-                if isinstance(cors_origins, str) and not cors_origins.startswith("["):
-                    self.CORS_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v) -> List[str]:
+        """Parse CORS_ORIGINS from various formats"""
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            # Try JSON first
+            if v.strip().startswith('['):
+                try:
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return parsed
+                except json.JSONDecodeError:
+                    pass
+            # Try comma-separated
+            origins = [origin.strip() for origin in v.split(',') if origin.strip()]
+            if origins:
+                return origins
+        # Return default if parsing fails
+        return [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ]
     
     class Config:
         env_file = ".env"
