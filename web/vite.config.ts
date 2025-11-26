@@ -1,23 +1,54 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tsconfigPaths({
-      root: __dirname,
-    }),
-  ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@carbon-tracker/shared-types": path.resolve(__dirname, "../packages/shared-types/src"),
+// Custom plugin to resolve @ aliases with extensions
+const aliasResolver = () => {
+  return {
+    name: "alias-resolver",
+    resolveId(id: string) {
+      if (id.startsWith("@/")) {
+        const filePath = id.replace("@/", path.resolve(__dirname, "./src/"));
+        const extensions = [".ts", ".tsx", ".js", ".jsx"];
+        for (const ext of extensions) {
+          const fullPath = filePath + ext;
+          if (fs.existsSync(fullPath)) {
+            return fullPath;
+          }
+        }
+        // Try without extension if it's a directory
+        if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+          const indexFiles = ["index.ts", "index.tsx", "index.js", "index.jsx"];
+          for (const indexFile of indexFiles) {
+            const fullPath = path.join(filePath, indexFile);
+            if (fs.existsSync(fullPath)) {
+              return fullPath;
+            }
+          }
+        }
+      }
+      return null;
     },
+  };
+};
+
+export default defineConfig({
+  plugins: [react(), aliasResolver()],
+  resolve: {
+    alias: [
+      {
+        find: /^@\/(.*)$/,
+        replacement: path.resolve(__dirname, "./src/$1"),
+      },
+      {
+        find: "@carbon-tracker/shared-types",
+        replacement: path.resolve(__dirname, "../packages/shared-types/src"),
+      },
+    ],
     extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".mts", ".json"],
   },
   build: {
@@ -39,4 +70,3 @@ export default defineConfig({
     host: true,
   },
 });
-
