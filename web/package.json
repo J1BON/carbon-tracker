@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "rm -rf node_modules/.vite .vite 2>/dev/null || true",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
+    "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "jest",
