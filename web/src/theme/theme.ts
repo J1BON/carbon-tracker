@@ -1,5 +1,8 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
-import { green, blue, cyan, orange, purple, red } from '@mui/material/colors';
+// Theme configuration - Currently not in use (using Tailwind CSS instead)
+// Keeping file for potential future use with Material-UI
+
+// Temporary exports to avoid build errors
+export const theme = {} as any;
 
 const themeOptions: ThemeOptions = {
   palette: {
