@@ -4,6 +4,8 @@ Configuration settings for the Carbon Tracker API
 
 from pydantic_settings import BaseSettings
 from typing import List
+import json
+import os
 
 
 class Settings(BaseSettings):
@@ -12,7 +14,7 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     DEBUG: bool = False
     
-    # CORS
+    # CORS - Parse from JSON string if provided, otherwise use defaults
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
@@ -51,10 +53,22 @@ class Settings(BaseSettings):
     # Carbon calculation settings
     DEFAULT_WEIGHT_AVERAGE: float = 70.0  # kg
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Parse CORS_ORIGINS from JSON string if it's a string
+        cors_origins = os.getenv("CORS_ORIGINS", "")
+        if cors_origins:
+            try:
+                # Try to parse as JSON array
+                self.CORS_ORIGINS = json.loads(cors_origins)
+            except (json.JSONDecodeError, TypeError):
+                # If not JSON, try comma-separated
+                if isinstance(cors_origins, str) and not cors_origins.startswith("["):
+                    self.CORS_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+    
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 
 settings = Settings()
-
