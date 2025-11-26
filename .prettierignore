@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+.next
+.turbo
+coverage
+*.pyc
+__pycache__
+.pytest_cache
+*.pth
+*.pt
+.env
+

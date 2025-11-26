@@ -1,0 +1,88 @@
+<svg width="1600" height="800" viewBox="0 0 1600 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#B0E0E6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E0F6FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#90EE90;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#228B22;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="sunGrad" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#FFE135;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0.8" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Sky Background -->
+  <rect width="1600" height="500" fill="url(#skyGrad)"/>
+  
+  <!-- Ground -->
+  <rect y="500" width="1600" height="300" fill="url(#groundGrad)"/>
+  
+  <!-- Sun -->
+  <circle cx="1400" cy="120" r="70" fill="url(#sunGrad)"/>
+  <circle cx="1400" cy="120" r="60" fill="#FFE135" opacity="0.6"/>
+  
+  <!-- Clouds -->
+  <g id="clouds" opacity="0.9">
+    <ellipse cx="200" cy="150" rx="50" ry="30" fill="#FFFFFF"/>
+    <ellipse cx="220" cy="150" rx="45" ry="25" fill="#FFFFFF"/>
+    <ellipse cx="210" cy="135" rx="40" ry="25" fill="#FFFFFF"/>
+    
+    <ellipse cx="500" cy="180" rx="55" ry="35" fill="#FFFFFF"/>
+    <ellipse cx="525" cy="180" rx="50" ry="30" fill="#FFFFFF"/>
+    <ellipse cx="512" cy="160" rx="45" ry="30" fill="#FFFFFF"/>
+    
+    <ellipse cx="900" cy="140" rx="60" ry="35" fill="#FFFFFF"/>
+    <ellipse cx="925" cy="140" rx="55" ry="30" fill="#FFFFFF"/>
+    <ellipse cx="912" cy="120" rx="50" ry="30" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Mountains (background) -->
+  <g id="mountains" opacity="0.7">
+    <polygon points="0,500 150,400 300,500" fill="#6B8E23"/>
+    <polygon points="250,500 400,350 550,500" fill="#556B2F"/>
+    <polygon points="500,500 650,300 800,500" fill="#6B8E23"/>
+    <polygon points="750,500 900,320 1050,500" fill="#556B2F"/>
+    <polygon points="1000,500 1150,380 1300,500" fill="#6B8E23"/>
+    <polygon points="1250,500 1400,360 1550,500" fill="#556B2F"/>
+  </g>
+  
+  <!-- Trees (foreground) -->
+  <g id="trees" opacity="0.85">
+    <!-- Large trees -->
+    <ellipse cx="100" cy="480" rx="80" ry="100" fill="#2D5016"/>
+    <rect x="95" y="480" width="10" height="60" fill="#8B4513"/>
+    
+    <ellipse cx="300" cy="470" rx="90" ry="110" fill="#2D5016"/>
+    <rect x="295" y="470" width="12" height="70" fill="#8B4513"/>
+    
+    <ellipse cx="500" cy="490" rx="75" ry="95" fill="#2D5016"/>
+    <rect x="495" y="490" width="10" height="50" fill="#8B4513"/>
+    
+    <ellipse cx="700" cy="475" rx="85" ry="105" fill="#2D5016"/>
+    <rect x="695" y="475" width="11" height="65" fill="#8B4513"/>
+    
+    <ellipse cx="900" cy="485" rx="70" ry="90" fill="#2D5016"/>
+    <rect x="895" y="485" width="10" height="55" fill="#8B4513"/>
+    
+    <ellipse cx="1100" cy="465" rx="95" ry="115" fill="#2D5016"/>
+    <rect x="1095" y="465" width="12" height="75" fill="#8B4513"/>
+    
+    <ellipse cx="1300" cy="480" rx="80" ry="100" fill="#2D5016"/>
+    <rect x="1295" y="480" width="10" height="60" fill="#8B4513"/>
+    
+    <ellipse cx="1500" cy="470" rx="90" ry="110" fill="#2D5016"/>
+    <rect x="1495" y="470" width="12" height="70" fill="#8B4513"/>
+  </g>
+  
+  <!-- Birds -->
+  <g id="birds" opacity="0.6">
+    <path d="M 400 200 Q 410 190 420 200 Q 410 210 400 200" fill="#2C3E50" stroke="#1A252F" stroke-width="1"/>
+    <path d="M 450 180 Q 460 170 470 180 Q 460 190 450 180" fill="#2C3E50" stroke="#1A252F" stroke-width="1"/>
+    <path d="M 800 220 Q 810 210 820 220 Q 810 230 800 220" fill="#2C3E50" stroke="#1A252F" stroke-width="1"/>
+  </g>
+</svg>
+

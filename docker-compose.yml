@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: carbon-tracker-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-carbon_tracker}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - carbon-tracker-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: carbon-tracker-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-carbon_tracker}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      ML_SERVICE_URL: http://ml-service:8001
+      REDIS_URL: redis://redis:6379
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-carbon-tracker-images}
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+      - ./packages/shared-types:/app/shared-types
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - carbon-tracker-network
+    restart: unless-stopped
+
+  ml-service:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: carbon-tracker-ml
+    environment:
+      MODEL_PATH: /app/models/waste_classifier.pth
+      CONFIDENCE_THRESHOLD: 0.7
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-carbon-tracker-images}
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:-}
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./ml:/app
+      - ml_models:/app/models
+    networks:
+      - carbon-tracker-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: carbon-tracker-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - carbon-tracker-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: carbon-tracker-web
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+      VITE_ML_SERVICE_URL: ${VITE_ML_SERVICE_URL:-http://localhost:8001}
+      VITE_MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - carbon-tracker-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  ml_models:
+
+networks:
+  carbon-tracker-network:
+    driver: bridge
+

@@ -1,0 +1,26 @@
+# Minimal requirements to get backend running
+# Use SQLite instead of PostgreSQL (no psycopg2-binary needed!)
+
+# FastAPI & ASGI
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# Database (SQLite is built into Python, no driver needed!)
+sqlalchemy>=2.0.25
+alembic>=1.13.1
+
+# Authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.1
+python-dotenv>=1.0.0
+
+# Validation
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
+email-validator>=2.1.0
+
+# HTTP Client
+httpx>=0.26.0
+
