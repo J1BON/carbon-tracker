@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
-import { apiRequest } from "@/lib/api";
+import { apiRequest } from "@/lib/api.ts";
 import CarbonCalculator from "@/components/CarbonCalculator";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { formatCarbonAmount } from "@/lib/utils";
-import { exportActivityToPDF } from "@/lib/pdfExport";
+import { formatCarbonAmount } from "@/lib/utils.ts";
+import { exportActivityToPDF } from "@/lib/pdfExport.ts";
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
