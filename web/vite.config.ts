@@ -10,15 +10,15 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: "@",
-        replacement: path.resolve(__dirname, "./src"),
+        find: /^@\/(.*)/,
+        replacement: path.resolve(__dirname, "./src/$1"),
       },
       {
         find: "@carbon-tracker/shared-types",
         replacement: path.resolve(__dirname, "../packages/shared-types/src"),
       },
     ],
-    extensions: [".mjs", ".js", ".mts", ".ts", ".jsx", ".tsx", ".json"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".mts", ".json"],
   },
   server: {
     port: 3000,
