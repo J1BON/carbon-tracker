@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd web && npm install && npm run build",
+  "buildCommand": "npm install && npm run build --workspace=@carbon-tracker/shared-types && npm run build --workspace=@carbon-tracker/web",
   "outputDirectory": "web/dist",
-  "installCommand": "cd web && npm install",
+  "installCommand": "npm install",
   "framework": "vite"
 }
 
