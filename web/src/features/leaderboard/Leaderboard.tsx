@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/api";
+import { apiRequest } from "@/lib/api.ts";
 import { Trophy, Medal, Award, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
