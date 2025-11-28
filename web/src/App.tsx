@@ -5,6 +5,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 import Login from "@/pages/Login";
+import VerifyEmail from "@/pages/VerifyEmail";
+import VerifyEmailRequired from "@/pages/VerifyEmailRequired";
 import Dashboard from "@/features/dashboard/Dashboard";
 import TreePlanting from "@/features/tree-planting/TreePlanting";
 import Leaderboard from "@/features/leaderboard/Leaderboard";
@@ -43,6 +45,8 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-required" element={<VerifyEmailRequired />} />
           <Route path="/home" element={<Home />} />
           <Route
             path="/"

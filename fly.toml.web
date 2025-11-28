@@ -1,0 +1,24 @@
+# Fly.io configuration for frontend
+# Place this in the web/ directory or root
+
+app = "carbon-tracker-web"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.fly"
+  dockerfile_path = "../web/Dockerfile.fly"
+  build_context = ".."
+
+[[services]]
+  internal_port = 80
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+

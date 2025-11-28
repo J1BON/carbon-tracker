@@ -56,7 +56,13 @@ export default function Login() {
       setToken(access_token);
       setUser(user);
       
-      navigate("/home");
+      // If email not verified, user will be blocked by ProtectedRoute
+      if (user.email_verified) {
+        navigate("/home");
+      } else {
+        // Redirect to home, but ProtectedRoute will show verification page
+        navigate("/");
+      }
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || "Invalid email or password. Please try again.";
       setError(errorMsg);
@@ -80,7 +86,14 @@ export default function Login() {
       setToken(access_token);
       setUser(user);
       
-      navigate("/home");
+      // If email not verified, user will be blocked by ProtectedRoute
+      // They'll see the verification required page
+      if (user.email_verified) {
+        navigate("/home");
+      } else {
+        // Still navigate, but ProtectedRoute will show verification page
+        navigate("/");
+      }
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || "Registration failed. Please try again.";
       setError(errorMsg);

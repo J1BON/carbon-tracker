@@ -73,6 +73,64 @@ async def global_exception_handler(request, exc):
 async def startup_event():
     """Startup tasks"""
     print("🌱 Carbon Tracker API starting up...")
+    
+    # Create tables if they don't exist (for SQLite - skip migrations)
+    from app.config import settings
+    print(f"📊 DATABASE_URL: {settings.DATABASE_URL}")
+    
+    if settings.DATABASE_URL.startswith("sqlite"):
+        try:
+            from app.database import Base, engine
+            # Import all models to register them
+            from app.models import User, CarbonLog, Badge, UserBadge, Challenge, RecyclingPoint, CFCReport
+            
+            # Extract database file path for logging
+            db_path = settings.DATABASE_URL.replace("sqlite:///", "")
+            print(f"📁 Database file path: {db_path}")
+            
+            # Check if database file exists
+            import os
+            if os.path.exists(db_path):
+                file_size = os.path.getsize(db_path)
+                print(f"📊 Existing database file size: {file_size} bytes")
+            else:
+                print(f"📊 Database file does not exist yet, will be created")
+            
+            print("Creating database tables if they don't exist (SQLite)...")
+            Base.metadata.create_all(bind=engine)
+            
+            # Check if email verification columns exist, if not, add them
+            try:
+                from sqlalchemy import inspect, text
+                inspector = inspect(engine)
+                columns = [col['name'] for col in inspector.get_columns('users')]
+                
+                if 'email_verified' not in columns:
+                    print("⚠️ Email verification columns missing - adding them...")
+                    with engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT 0"))
+                        conn.execute(text("ALTER TABLE users ADD COLUMN verification_token VARCHAR(255)"))
+                        conn.execute(text("ALTER TABLE users ADD COLUMN verification_token_expires DATETIME"))
+                        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_verification_token ON users(verification_token)"))
+                        conn.commit()
+                    print("✅ Email verification columns added!")
+                else:
+                    print("✅ Email verification columns already exist")
+            except Exception as migration_error:
+                print(f"⚠️ Could not check/add email verification columns: {migration_error}")
+                print("You may need to run migrate_email_verification.py manually")
+            
+            # Verify after creation
+            if os.path.exists(db_path):
+                file_size = os.path.getsize(db_path)
+                print(f"✅ Database tables ready! File size: {file_size} bytes")
+            else:
+                print("⚠️ WARNING: Database file was not created!")
+        except Exception as e:
+            import traceback
+            print(f"❌ Error creating tables: {e}")
+            print(traceback.format_exc())
+            print("Continuing anyway - tables might already exist...")
 
 
 @app.on_event("shutdown")

@@ -7,14 +7,22 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
+import os
 
 from app.database import Base
+from app.config import settings
+
+# Use String for SQLite, UUID for PostgreSQL
+if settings.DATABASE_URL.startswith("sqlite"):
+    UUIDType = String(36)  # UUID as string for SQLite
+else:
+    UUIDType = UUID(as_uuid=True)
 
 
 class User(Base):
     __tablename__ = "users"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
     email = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=False)
@@ -31,6 +39,11 @@ class User(Base):
     is_admin = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     
+    # Email Verification
+    email_verified = Column(Boolean, default=False, nullable=False)
+    verification_token = Column(String(255), nullable=True, index=True)
+    verification_token_expires = Column(DateTime, nullable=True)
+    
     # Relationships
     carbon_logs = relationship("CarbonLog", back_populates="user")
     badges = relationship("UserBadge", back_populates="user")
@@ -40,8 +53,8 @@ class User(Base):
 class CarbonLog(Base):
     __tablename__ = "carbon_logs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
+    user_id = Column(UUIDType, ForeignKey("users.id"), nullable=False, index=True)
     category = Column(String(50), nullable=False, index=True)  # transport, diet, energy, etc.
     activity = Column(String(255), nullable=False)
     carbon_amount_kg = Column(Float, nullable=False)
@@ -55,7 +68,7 @@ class CarbonLog(Base):
 class Badge(Base):
     __tablename__ = "badges"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
     name = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=True)
     icon = Column(String(50), nullable=True)
@@ -67,8 +80,8 @@ class Badge(Base):
 class UserBadge(Base):
     __tablename__ = "user_badges"
     
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    badge_id = Column(UUID(as_uuid=True), ForeignKey("badges.id"), primary_key=True)
+    user_id = Column(UUIDType, ForeignKey("users.id"), primary_key=True)
+    badge_id = Column(UUIDType, ForeignKey("badges.id"), primary_key=True)
     earned_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -79,13 +92,13 @@ class UserBadge(Base):
 class Challenge(Base):
     __tablename__ = "challenges"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     target_value = Column(Float, nullable=False)
     current_unit = Column(String(50), nullable=False)
     reward_points = Column(Integer, default=0)
-    badge_reward = Column(UUID(as_uuid=True), ForeignKey("badges.id"), nullable=True)
+    badge_reward = Column(UUIDType, ForeignKey("badges.id"), nullable=True)
     expires_at = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -94,7 +107,7 @@ class Challenge(Base):
 class RecyclingPoint(Base):
     __tablename__ = "recycling_points"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
     name = Column(String(255), nullable=False)
     address = Column(String(500), nullable=False)
     latitude = Column(Float, nullable=False, index=True)
@@ -111,8 +124,8 @@ class RecyclingPoint(Base):
 class CFCReport(Base):
     __tablename__ = "cfc_reports"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    id = Column(UUIDType, primary_key=True, default=lambda: str(uuid.uuid4()) if settings.DATABASE_URL.startswith("sqlite") else uuid.uuid4())
+    user_id = Column(UUIDType, ForeignKey("users.id"), nullable=False, index=True)
     device = Column(String(50), nullable=False)  # AC / Refrigerator
     issue_type = Column(String(50), nullable=False)  # Gas leak / Disposal / Servicing
     notes = Column(Text, nullable=True)

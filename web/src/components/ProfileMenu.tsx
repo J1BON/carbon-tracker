@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Mail, CheckCircle2, XCircle } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [resending, setResending] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuthStore();
+  const { user, logout, refreshUser } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +33,19 @@ export default function ProfileMenu() {
     logout();
     navigate("/login");
     setIsOpen(false);
+  };
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await api.post("/api/v1/auth/resend-verification");
+      alert("Verification email sent! Please check your inbox.");
+      await refreshUser();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || "Failed to send verification email. Please try again.");
+    } finally {
+      setResending(false);
+    }
   };
 
   if (!user) {
@@ -63,13 +78,24 @@ export default function ProfileMenu() {
                 <p className="text-xs text-gray-400">{user.email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge className="text-xs bg-blue-500/20 text-blue-300 border border-blue-400/20 font-medium">
                 Level {user.level}
               </Badge>
               <Badge variant="outline" className="text-xs border-white/20 text-gray-300 font-medium bg-white/5">
                 {user.total_points || 0} points
               </Badge>
+              {user.email_verified ? (
+                <Badge className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/20 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Verified
+                </Badge>
+              ) : (
+                <Badge className="text-xs bg-yellow-500/20 text-yellow-300 border border-yellow-400/20 font-medium flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  Unverified
+                </Badge>
+              )}
             </div>
             {user.eco_score !== undefined && (
               <div className="mt-3 pt-3 border-t border-white/10">
@@ -81,7 +107,19 @@ export default function ProfileMenu() {
             )}
           </div>
           
-          <div className="p-2">
+          <div className="p-2 space-y-2">
+            {!user.email_verified && (
+              <button
+                onClick={handleResendVerification}
+                disabled={resending}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-yellow-500/10 text-yellow-400 transition-colors duration-200 group disabled:opacity-50"
+              >
+                <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold">
+                  {resending ? "Sending..." : "Resend Verification Email"}
+                </span>
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors duration-200 group"

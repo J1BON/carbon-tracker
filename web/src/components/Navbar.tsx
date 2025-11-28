@@ -71,6 +71,18 @@ export default function Navbar() {
     };
   }, [cfcMenuOpen]);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -202,8 +214,8 @@ export default function Navbar() {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="overflow-hidden border-t border-white/10 bg-black/95 backdrop-blur-xl">
-            <div className="py-4 space-y-2">
+          <div className="border-t border-white/10 bg-black/95 backdrop-blur-xl fixed left-0 right-0 top-16 bottom-0 overflow-y-auto overscroll-contain z-40">
+            <div className="py-4 space-y-2 pb-8">
               {filteredNavLinks.map((link) => {
                 const IconComponent = link.icon;
                 return (

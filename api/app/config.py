@@ -3,9 +3,10 @@ Configuration settings for the Carbon Tracker API
 """
 
 from pydantic_settings import BaseSettings
-from pydantic import field_validator, Field
-from typing import List
+from pydantic import field_validator, Field, model_validator
+from typing import List, Optional, Union
 import json
+import os
 
 
 class Settings(BaseSettings):
@@ -14,14 +15,9 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     DEBUG: bool = False
     
-    # CORS - Parse from JSON string, comma-separated string, or use defaults
-    CORS_ORIGINS: List[str] = Field(
-        default=[
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-        ],
+    # CORS - Accept as string or list, will be parsed to List[str] by model_validator
+    CORS_ORIGINS: Union[List[str], str, None] = Field(
+        default=None,
         description="CORS allowed origins"
     )
     
@@ -29,7 +25,7 @@ class Settings(BaseSettings):
     # Supports both PostgreSQL and SQLite
     # PostgreSQL: postgresql://user:password@host:5432/dbname
     # SQLite: sqlite:///./carbon_tracker.db (for local development)
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/carbon_tracker"
+    DATABASE_URL: str = "sqlite:///./carbon_tracker.db"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
@@ -56,26 +52,75 @@ class Settings(BaseSettings):
     # Carbon calculation settings
     DEFAULT_WEIGHT_AVERAGE: float = 70.0  # kg
     
-    @field_validator('CORS_ORIGINS', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v) -> List[str]:
-        """Parse CORS_ORIGINS from various formats"""
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
+    # Email Settings
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "noreply@carbontracker.com"
+    SMTP_FROM_NAME: str = "Carbon Tracker"
+    
+    # Alternative: Resend API (https://resend.com)
+    RESEND_API_KEY: str = ""
+    
+    # Frontend URL for email links
+    FRONTEND_URL: str = "http://localhost:3000"
+    
+    # Email verification token expiry (hours)
+    VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
+    
+    @model_validator(mode='after')
+    def parse_cors_origins(self):
+        """Parse CORS_ORIGINS after initialization"""
+        cors_value = self.CORS_ORIGINS
+        
+        # If already a list, use it
+        if isinstance(cors_value, list):
+            self.CORS_ORIGINS = cors_value
+            return self
+        
+        # If None or empty, use defaults
+        if not cors_value:
+            self.CORS_ORIGINS = [
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5173",
+            ]
+            return self
+        
+        # If string, try to parse
+        if isinstance(cors_value, str):
             # Try JSON first
-            if v.strip().startswith('['):
+            if cors_value.strip().startswith('['):
                 try:
-                    parsed = json.loads(v)
+                    parsed = json.loads(cors_value)
                     if isinstance(parsed, list):
-                        return parsed
-                except json.JSONDecodeError:
+                        self.CORS_ORIGINS = parsed
+                        return self
+                except (json.JSONDecodeError, ValueError):
                     pass
+            
             # Try comma-separated
-            origins = [origin.strip() for origin in v.split(',') if origin.strip()]
+            origins = [origin.strip() for origin in cors_value.split(',') if origin.strip()]
             if origins:
-                return origins
-        # Return default if parsing fails
+                self.CORS_ORIGINS = origins
+                return self
+        
+        # Fallback to defaults
+        self.CORS_ORIGINS = [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ]
+        return self
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Always return CORS_ORIGINS as a list"""
+        if isinstance(self.CORS_ORIGINS, list):
+            return self.CORS_ORIGINS
         return [
             "http://localhost:3000",
             "http://localhost:5173",

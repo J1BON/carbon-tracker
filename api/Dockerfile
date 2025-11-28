@@ -19,13 +19,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
-# Copy and make entrypoint executable
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Expose port
+# Expose port (must match fly.toml internal_port)
 EXPOSE 8000
 
-# Run application using entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+# Run application - Fly.io sets PORT automatically, default to 8000
+# Must listen on 0.0.0.0, not 127.0.0.1
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 

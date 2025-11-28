@@ -73,3 +73,6 @@ wandb/
 # Docker
 .dockerignore
 
+
+# Local Netlify folder
+.netlify
