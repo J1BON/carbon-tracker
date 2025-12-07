@@ -36,7 +36,7 @@ const resources = [
       <h2>Getting Started</h2>
       <p>Start by tracking one category at a time. Most people find it easiest to begin with transportation, as it's often the largest contributor. Then move on to diet, energy, and other categories.</p>
     `,
-    author: "Carbon Tracker Team",
+    author: "MyCarbonFootprint Team",
     date: "2024-01-15",
     type: "guide",
     link: "#"
@@ -287,7 +287,7 @@ const resources = [
       <h2>What You'll Learn</h2>
       <p>By the end of this series, you'll be able to calculate your carbon footprint, understand which activities contribute most to your emissions, and develop a personalized plan to reduce your environmental impact.</p>
     `,
-    author: "Carbon Tracker Team",
+    author: "MyCarbonFootprint Team",
     date: "2024-01-15",
     type: "video",
     link: "#"

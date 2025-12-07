@@ -222,7 +222,16 @@ export default function LearnAboutCFC() {
                       Report CFC issues and help us track and reduce harmful emissions
                     </p>
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-4">
+                    <Link to="/cfc/calculator">
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"
+                      >
+                        Calculate CFC Impact
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Button>
+                    </Link>
                     <Link to="/cfc/report">
                       <Button
                         size="lg"

@@ -14,11 +14,15 @@ from app.auth import get_current_active_user
 from app.services.carbon_calculator import CarbonCalculator
 from app.services.gamification import GamificationService
 from app.services.suggestion_service import SuggestionService
+from app.services.report_service import ReportService
+from app.services.impact_service import ImpactService
 
 router = APIRouter()
 calculator = CarbonCalculator()
 gamification = GamificationService()
 suggestion_service = SuggestionService()
+report_service = ReportService()
+impact_service = ImpactService()
 
 
 class CarbonLogCreate(BaseModel):
@@ -179,6 +183,9 @@ async def get_carbon_stats(
     recent_logs = [log for log in logs if log.created_at >= thirty_days_ago]
     daily_average_kg = sum(log.carbon_amount_kg for log in recent_logs) / 30 if recent_logs else 0
     
+    # Get impact equivalents for monthly emissions
+    monthly_equivalents = impact_service.get_equivalents(monthly_kg)
+    
     return {
         "success": True,
         "data": {
@@ -186,6 +193,7 @@ async def get_carbon_stats(
             "daily_average_kg": round(daily_average_kg, 2),
             "monthly_kg": round(monthly_kg, 2),
             "by_category": {k: round(v, 2) for k, v in by_category.items()},
+            "equivalents": monthly_equivalents,
         },
     }
 
@@ -222,5 +230,124 @@ async def get_daily_tip():
         "data": {
             "tip": tip,
         },
+    }
+
+
+@router.get("/recommendations")
+async def get_personalized_recommendations(
+    days: int = 30,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get personalized, actionable recommendations based on user's highest emission category
+    Includes category-specific tips, quick wins, and savings calculator
+    """
+    recommendations = suggestion_service.get_personalized_recommendations(
+        current_user, db, days=days
+    )
+    
+    return {
+        "success": True,
+        "data": recommendations,
+    }
+
+
+@router.get("/reports/weekly")
+async def get_weekly_report(
+    week_start: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get weekly carbon emission report
+    """
+    week_start_date = None
+    if week_start:
+        try:
+            week_start_date = datetime.fromisoformat(week_start.replace('Z', '+00:00'))
+        except:
+            pass
+    
+    report = report_service.get_weekly_report(
+        current_user, db, week_start=week_start_date
+    )
+    
+    return {
+        "success": True,
+        "data": report,
+    }
+
+
+@router.get("/reports/monthly")
+async def get_monthly_report(
+    month: Optional[int] = None,
+    year: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get monthly carbon emission report
+    """
+    report = report_service.get_monthly_report(
+        current_user, db, month=month, year=year
+    )
+    
+    return {
+        "success": True,
+        "data": report,
+    }
+
+
+@router.get("/impact")
+async def get_carbon_impact(
+    days: int = 30,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get real-world impact equivalents for user's carbon emissions
+    Shows equivalents like driving distance, trees needed, etc.
+    """
+    impact = impact_service.get_user_impact(current_user, db, days=days)
+    
+    return {
+        "success": True,
+        "data": impact,
+    }
+
+
+@router.get("/impact/equivalents")
+async def get_equivalents(
+    carbon_kg: float,
+):
+    """
+    Calculate real-world equivalents for a given carbon amount
+    """
+    equivalents = impact_service.get_equivalents(carbon_kg)
+    
+    return {
+        "success": True,
+        "data": {
+            "carbon_kg": carbon_kg,
+            "equivalents": equivalents,
+        },
+    }
+
+
+@router.get("/impact/community")
+async def get_community_impact(
+    days: int = 30,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get community-wide impact statistics
+    """
+    impact = impact_service.get_community_impact(db, days=days)
+    
+    return {
+        "success": True,
+        "data": impact,
     }
 

@@ -75,11 +75,17 @@ export default function Navbar() {
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [mobileMenuOpen]);
 
@@ -104,7 +110,7 @@ export default function Navbar() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                  Carbon Tracker
+                  MyCarbonFootprint
                 </h1>
               </div>
             </Link>
@@ -116,10 +122,14 @@ export default function Navbar() {
               const IconComponent = link.icon;
               return (
                 <div key={link.path}>
-                  <Link to={link.path}>
+                  <Link 
+                    to={link.path}
+                    className="focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-black rounded-xl"
+                    tabIndex={0}
+                  >
                     <Button
                       variant="ghost"
-                      className={`group relative px-4 py-2 rounded-xl transition-all duration-200 ${
+                      className={`group relative px-4 py-2 rounded-xl transition-all duration-200 min-h-[44px] ${
                         isActive(link.path)
                           ? "text-emerald-400 font-semibold bg-white/5"
                           : "text-gray-300 hover:text-white hover:bg-white/5"
@@ -139,11 +149,19 @@ export default function Navbar() {
                 <div className="relative" ref={cfcMenuRef}>
                   <button
                     onClick={() => setCfcMenuOpen(!cfcMenuOpen)}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setCfcMenuOpen(!cfcMenuOpen);
+                      }
+                    }}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 font-medium min-h-[44px] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-black ${
                       isCFCActive
                         ? "text-emerald-400 bg-white/5 font-semibold"
                         : "text-gray-300 hover:text-white hover:bg-white/5"
                     }`}
+                    aria-expanded={cfcMenuOpen}
+                    aria-haspopup="true"
                   >
                     CFC Emissions
                     <ChevronDown
@@ -170,20 +188,28 @@ export default function Navbar() {
                   )}
                 </div>
 
-                <Link to="/tree-planting">
+                <Link 
+                  to="/tree-planting"
+                  className="focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-black rounded-xl"
+                  tabIndex={0}
+                >
                   <Button
                     variant="default"
-                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200"
+                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 min-h-[44px]"
                   >
                     <Sprout className="w-4 h-4 mr-2" />
                     Plant Trees
                   </Button>
                 </Link>
 
-                <Link to="/leaderboard">
+                <Link 
+                  to="/leaderboard"
+                  className="focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-black rounded-xl"
+                  tabIndex={0}
+                >
                   <Button
                     variant="outline"
-                    className="border-white/20 hover:border-emerald-400/50 hover:bg-white/5 hover:text-emerald-400 text-gray-300 transition-all duration-200"
+                    className="border-white/20 hover:border-emerald-400/50 hover:bg-white/5 hover:text-emerald-400 text-gray-300 transition-all duration-200 min-h-[44px]"
                   >
                     <Trophy className="w-4 h-4 mr-2" />
                     Leaderboard
@@ -199,14 +225,18 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             {user && <ProfileMenu />}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+              onClick={() => {
+                setMobileMenuOpen(prev => !prev);
+              }}
+              className="relative z-50 p-3 min-w-[44px] min-h-[44px] rounded-xl hover:bg-white/10 active:bg-white/20 transition-colors touch-manipulation flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              type="button"
             >
               {mobileMenuOpen ? (
-                <X className="w-6 h-6 text-white" />
+                <X className="w-6 h-6 text-white pointer-events-none" />
               ) : (
-                <Menu className="w-6 h-6 text-white" />
+                <Menu className="w-6 h-6 text-white pointer-events-none" />
               )}
             </button>
           </div>
@@ -214,23 +244,40 @@ export default function Navbar() {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="border-t border-white/10 bg-black/95 backdrop-blur-xl fixed left-0 right-0 top-16 bottom-0 overflow-y-auto overscroll-contain z-40">
-            <div className="py-4 space-y-2 pb-8">
+          <div 
+            className="border-t border-white/10 bg-black/95 backdrop-blur-xl fixed left-0 right-0 top-16 bottom-0 overflow-y-auto overscroll-contain z-40"
+            onClick={(e) => {
+              // Close menu when clicking on backdrop (not on menu items)
+              if (e.target === e.currentTarget) {
+                setMobileMenuOpen(false);
+              }
+            }}
+          >
+            <div 
+              className="py-4 space-y-2 pb-8" 
+              onClick={(e) => e.stopPropagation()}
+            >
               {filteredNavLinks.map((link) => {
                 const IconComponent = link.icon;
                 return (
                   <Link
                     key={link.path}
                     to={link.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Small delay to ensure navigation happens first
+                      setTimeout(() => {
+                        setMobileMenuOpen(false);
+                      }, 100);
+                    }}
+                    className={`flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl transition-colors touch-manipulation ${
                       isActive(link.path)
                         ? "bg-white/5 text-emerald-400 font-semibold"
-                        : "text-gray-300 hover:bg-white/5"
+                        : "text-gray-300 active:bg-white/10"
                     }`}
                   >
-                    <IconComponent className="w-5 h-5" />
-                    {link.label}
+                    <IconComponent className="w-5 h-5 flex-shrink-0" />
+                    <span>{link.label}</span>
                   </Link>
                 );
               })}
@@ -243,14 +290,20 @@ export default function Navbar() {
                     <Link
                       key={item.path}
                       to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Small delay to ensure navigation happens first
+                        setTimeout(() => {
+                          setMobileMenuOpen(false);
+                        }, 100);
+                      }}
+                      className={`flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl transition-colors touch-manipulation ${
                         isActive(item.path)
                           ? "bg-white/5 text-emerald-400 font-semibold"
-                          : "text-gray-300 hover:bg-white/5"
+                          : "text-gray-300 active:bg-white/10"
                       }`}
                     >
-                      {item.label}
+                      <span>{item.label}</span>
                     </Link>
                   ))}
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2">
@@ -258,19 +311,29 @@ export default function Navbar() {
                   </div>
                   <Link
                     to="/tree-planting"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTimeout(() => {
+                        setMobileMenuOpen(false);
+                      }, 100);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white active:from-indigo-600 active:to-purple-700 transition-colors touch-manipulation"
                   >
-                    <Sprout className="w-5 h-5" />
-                    Plant Trees
+                    <Sprout className="w-5 h-5 flex-shrink-0" />
+                    <span>Plant Trees</span>
                   </Link>
                   <Link
                     to="/leaderboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/20 text-gray-300 hover:bg-white/5 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTimeout(() => {
+                        setMobileMenuOpen(false);
+                      }, 100);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl border border-white/20 text-gray-300 active:bg-white/10 transition-colors touch-manipulation"
                   >
-                    <Trophy className="w-5 h-5" />
-                    Leaderboard
+                    <Trophy className="w-5 h-5 flex-shrink-0" />
+                    <span>Leaderboard</span>
                   </Link>
                 </>
               )}

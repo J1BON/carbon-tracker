@@ -48,6 +48,8 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+    verification_url: str | None = None  # For development when email not configured
+    verification_token: str | None = None  # For development when email not configured
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
@@ -96,19 +98,28 @@ async def register(
         
         # Send verification email (async, don't wait for it)
         try:
-            await EmailService.send_verification_email(
+            email_sent = await EmailService.send_verification_email(
                 to_email=email,
                 name=user_data.name,
                 verification_token=verification_token
             )
+            if not email_sent:
+                # Email not configured - show verification link in response for development
+                print(f"📧 Email not configured. Verification token for {email}: {verification_token}")
+                print(f"🔗 Verification URL: {settings.FRONTEND_URL}/verify-email?token={verification_token}")
         except Exception as email_error:
             print(f"⚠️ Failed to send verification email: {email_error}")
+            print(f"🔗 Manual verification URL: {settings.FRONTEND_URL}/verify-email?token={verification_token}")
             # Don't fail registration if email fails
         
         # Create access token
         access_token = create_access_token(data={"sub": db_user.email})
         
-        return Token(
+        # Check if email service is configured
+        email_configured = bool(settings.SMTP_HOST and settings.SMTP_USER) or bool(settings.RESEND_API_KEY)
+        
+        # Build response
+        token_response = Token(
             access_token=access_token,
             token_type="bearer",
             user=UserResponse(
@@ -123,6 +134,16 @@ async def register(
                 email_verified=db_user.email_verified,
             )
         )
+        
+        # In development (email not configured), include verification info
+        if not email_configured:
+            verification_url = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+            token_response.verification_url = verification_url
+            token_response.verification_token = verification_token
+            print(f"📧 Email not configured - Verification URL: {verification_url}")
+            print(f"🔗 Use this URL to verify email: {verification_url}")
+        
+        return token_response
     except HTTPException:
         raise
     except Exception as e:
@@ -132,9 +153,16 @@ async def register(
         print(f"Registration error: {error_detail}")
         print(f"Traceback: {traceback_str}")
         db.rollback()
+        
+        # Check if it's a database table error
+        if "does not exist" in error_detail or "relation" in error_detail.lower():
+            error_message = "Database tables not found. Please run migrations: alembic upgrade head"
+        else:
+            error_message = f"Registration failed: {error_detail}"
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {error_detail}"
+            detail=error_message
         )
 
 

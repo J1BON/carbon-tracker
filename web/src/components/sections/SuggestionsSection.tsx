@@ -53,27 +53,27 @@ export default function SuggestionsSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden">
+    <section ref={ref} className="relative py-16 sm:py-24 md:py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 md:mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight px-4">
             Personalized
             <br />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
               eco suggestions
             </span>
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto px-4">
             Get actionable tips tailored to your lifestyle to reduce your carbon footprint
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {suggestions.map((suggestion, index) => {
             const IconComponent = suggestion.icon;
             const colorClasses = {
@@ -93,16 +93,16 @@ export default function SuggestionsSection() {
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ scale: 1.05, y: -8 }}
-                className="glass-card rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300 group cursor-pointer"
+                className="glass-card rounded-2xl p-5 sm:p-6 border border-white/10 hover:border-white/20 transition-all duration-300 group cursor-pointer"
               >
                 <div className="flex items-start gap-4 mb-4">
                   <div className={`w-12 h-12 rounded-xl ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                     <IconComponent className="w-6 h-6" />
                   </div>
-                  <div className="text-4xl">{suggestion.emoji}</div>
+                  <div className="text-3xl sm:text-4xl">{suggestion.emoji}</div>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{suggestion.title}</h3>
-                <p className="text-gray-300 leading-relaxed text-sm">{suggestion.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">{suggestion.title}</h3>
+                <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{suggestion.description}</p>
               </motion.div>
             );
           })}
@@ -111,6 +111,11 @@ export default function SuggestionsSection() {
     </section>
   );
 }
+
+
+
+
+
 
 
 

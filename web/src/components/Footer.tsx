@@ -15,12 +15,13 @@ export default function Footer() {
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Carbon Tracker</h3>
+                <h3 className="text-xl font-bold text-white">MyCarbonFootprint</h3>
               </div>
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed">
               Empowering individuals to understand and reduce their carbon footprint through 
-              innovative tracking and sustainable practices.
+              innovative tracking, personalized recommendations, and sustainable practices. 
+              Join thousands of users making a positive environmental impact.
             </p>
             <div className="flex items-center gap-4 pt-2">
               <a href="#" className="w-10 h-10 rounded-lg bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 flex items-center justify-center transition-colors duration-200">
@@ -106,17 +107,21 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-gray-400">
-                  123 Sustainability Street<br />
-                  Green City, GC 12345
+                  Available Worldwide<br />
+                  Supporting Global Climate Action
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                <span className="text-sm text-gray-400">+1 (555) 123-4567</span>
+                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <a href="mailto:info@mycarbonfootprint.app" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
+                  info@mycarbonfootprint.app
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                <span className="text-sm text-gray-400">info@carbontracker.com</span>
+                <a href="mailto:support@mycarbonfootprint.app" className="text-sm text-gray-400 hover:text-emerald-400 transition-colors">
+                  support@mycarbonfootprint.app
+                </a>
               </li>
             </ul>
           </div>
@@ -126,18 +131,18 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-8 mt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-400 text-center md:text-left">
-              © {currentYear} Carbon Tracker. All rights reserved.
+              © {currentYear} MyCarbonFootprint. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
-                Terms of Service
-              </a>
-              <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
-                Cookie Policy
-              </a>
+              <Link to="/about" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
+                About Us
+              </Link>
+              <Link to="/contact" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
+                Contact
+              </Link>
+              <Link to="/resources" className="text-gray-400 hover:text-emerald-400 transition-colors duration-200">
+                Resources
+              </Link>
             </div>
           </div>
         </div>

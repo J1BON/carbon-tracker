@@ -1,7 +1,7 @@
 [build]
-  base = "web"
-  command = "npm run build"
-  publish = "dist"
+  base = "."
+  command = "npm install && npm run build --workspace=@carbon-tracker/shared-types && npm run build --workspace=@carbon-tracker/web"
+  publish = "web/dist"
 
 [[redirects]]
   from = "/*"

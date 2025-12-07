@@ -23,7 +23,7 @@ export default function Resources() {
           title: "Understanding Your Carbon Footprint", 
           description: "Comprehensive guide explaining what a carbon footprint is, how it's calculated, and why it matters for climate change.",
           link: "#",
-          author: "Carbon Tracker Team",
+          author: "MyCarbonFootprint Team",
           date: "2024-01-15"
         },
         { 
@@ -103,11 +103,11 @@ export default function Resources() {
       icon: Video,
       items: [
         { 
-          id: "carbon-tracking-tutorial",
-          title: "Introduction to Carbon Tracking", 
-          description: "Watch our tutorial series on how to track your carbon footprint. Step-by-step guides.",
+          id: "carbon-measurement-tutorial",
+          title: "Introduction to Carbon Measurement", 
+          description: "Watch our tutorial series on how to measure your carbon footprint. Step-by-step guides.",
           link: "#",
-          author: "Carbon Tracker Team",
+          author: "MyCarbonFootprint Team",
           date: "2024-01-15"
         },
         { 
@@ -245,7 +245,7 @@ export default function Resources() {
                 <h3 className="text-xl font-semibold text-white">Data Sources</h3>
               </div>
               <p className="text-gray-300 leading-relaxed mb-4">
-                Our emission factors and calculations are based on data from:
+                Our emission factors and calculations are based on data from internationally recognized organizations and Bangladesh-specific sources:
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li className="flex items-center gap-2">
@@ -258,15 +258,43 @@ export default function Resources() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-400" />
-                  <span>UN Environment Programme</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
-                  <span>Arbor Day Foundation</span>
+                  <span>IEA (International Energy Agency)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-400" />
                   <span>Our World in Data</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>FAO (Food and Agriculture Organization)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>IRRI (International Rice Research Institute)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>DEFRA (UK Government Conversion Factors)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>🇧🇩 BPDB (Bangladesh Power Development Board)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>🇧🇩 BRTA (Bangladesh Road Transport Authority)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>🇧🇩 Petrobangla (Bangladesh Oil, Gas & Mineral Corp)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>🇧🇩 BIWTA (Bangladesh Inland Water Transport Authority)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span>Arbor Day Foundation (Tree Data)</span>
                 </li>
               </ul>
             </div>
@@ -277,24 +305,32 @@ export default function Resources() {
                 <h3 className="text-xl font-semibold text-white">Reliability</h3>
               </div>
               <p className="text-gray-300 leading-relaxed mb-4">
-                All data and calculations are verified and sourced from internationally recognized organizations:
+                All data and calculations are verified and sourced from internationally recognized organizations and local authorities:
               </p>
               <ul className="space-y-2 text-sm text-gray-300">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-teal-400" />
-                  <span>Peer-reviewed scientific sources</span>
+                  <span>Peer-reviewed scientific sources (Science Journal, EDP Database)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-teal-400" />
-                  <span>Government environmental agencies</span>
+                  <span>Government environmental agencies (EPA, DEFRA, BPDB, BRTA)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-teal-400" />
-                  <span>International climate organizations</span>
+                  <span>International climate organizations (IPCC, IEA, UN)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-teal-400" />
-                  <span>Regularly updated emission factors</span>
+                  <span>Bangladesh-specific local data (Petrobangla, BIWTA, Market Surveys)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-teal-400" />
+                  <span>Regularly updated emission factors (Annual review cycle)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-teal-400" />
+                  <span>Cross-referenced with multiple authoritative sources</span>
                 </li>
               </ul>
             </div>

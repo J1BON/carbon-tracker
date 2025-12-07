@@ -15,6 +15,7 @@ import CFCReportForm from "@/features/cfc/CFCReportForm";
 import LearnAboutCFC from "@/features/cfc/LearnAboutCFC";
 import MyCFCReports from "@/features/cfc/MyCFCReports";
 import EcoTipsChatbot from "@/features/cfc/EcoTipsChatbot";
+import CFCCalculator from "@/features/cfc/CFCCalculator";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Resources from "@/pages/Resources";
@@ -86,6 +87,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyCFCReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cfc/calculator"
+            element={
+              <ProtectedRoute>
+                <CFCCalculator />
               </ProtectedRoute>
             }
           />

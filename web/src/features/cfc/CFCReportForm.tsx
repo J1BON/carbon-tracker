@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useNavigate, Link } from "react-router-dom";
 import { apiRequest } from "@/lib/api.ts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { AlertCircle, CheckCircle2, Wind, Refrigerator, AlertTriangle, Trash2, Wrench } from "lucide-react";
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  Wind, 
+  Refrigerator, 
+  AlertTriangle, 
+  Trash2, 
+  Wrench,
+  Snowflake,
+  Droplets,
+  Car,
+  GlassWater,
+  IceCream,
+  Thermometer,
+  Building2,
+  Package,
+  RotateCcw,
+  RefreshCw,
+  Settings,
+  ArrowUpCircle,
+  Recycle,
+  Calculator
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CFCReportFormData {
@@ -16,6 +38,38 @@ interface CFCReportFormData {
   issue_type: string;
   notes: string;
 }
+
+// Device configurations with icons and descriptions
+const DEVICE_CONFIG: Record<string, { icon: any; description: string; category: string }> = {
+  "AC": { icon: Wind, description: "Air Conditioner", category: "Cooling" },
+  "Refrigerator": { icon: Refrigerator, description: "Refrigerator", category: "Cooling" },
+  "Freezer": { icon: Snowflake, description: "Standalone Freezer", category: "Cooling" },
+  "Dehumidifier": { icon: Droplets, description: "Dehumidifier", category: "Climate Control" },
+  "Car AC": { icon: Car, description: "Automotive Air Conditioning", category: "Automotive" },
+  "Water Cooler": { icon: GlassWater, description: "Water Cooler/Dispenser", category: "Cooling" },
+  "Ice Maker": { icon: IceCream, description: "Ice Maker Machine", category: "Cooling" },
+  "Heat Pump": { icon: Thermometer, description: "Heat Pump System", category: "Climate Control" },
+  "Chiller": { icon: Building2, description: "Commercial Chiller", category: "Commercial" },
+  "Walk-in Cooler": { icon: Package, description: "Walk-in Refrigeration", category: "Commercial" },
+  "Commercial Refrigeration": { icon: Building2, description: "Commercial Refrigeration", category: "Commercial" },
+  "Window AC": { icon: Wind, description: "Window Air Conditioner", category: "Cooling" },
+  "Split AC": { icon: Wind, description: "Split Air Conditioner", category: "Cooling" },
+  "Central AC": { icon: Wind, description: "Central Air Conditioning", category: "Cooling" },
+  "Car Refrigerator": { icon: Car, description: "Portable Car Refrigerator", category: "Automotive" },
+};
+
+// Issue type configurations
+const ISSUE_TYPE_CONFIG: Record<string, { icon: any; description: string; color: string }> = {
+  "Gas leak": { icon: AlertTriangle, description: "Refrigerant leak detected", color: "red" },
+  "Disposal": { icon: Trash2, description: "Device disposal/replacement", color: "orange" },
+  "Servicing": { icon: Wrench, description: "Maintenance/service required", color: "blue" },
+  "Replacement": { icon: RefreshCw, description: "Replacing old CFC device", color: "purple" },
+  "Improper disposal": { icon: AlertCircle, description: "Improper disposal concern", color: "red" },
+  "Recycling": { icon: Recycle, description: "Recycling old device", color: "green" },
+  "Maintenance check": { icon: Settings, description: "Routine maintenance check", color: "blue" },
+  "Refrigerant recharge": { icon: RotateCcw, description: "Refrigerant recharge needed", color: "cyan" },
+  "System upgrade": { icon: ArrowUpCircle, description: "Upgrading to CFC-free system", color: "emerald" },
+};
 
 export default function CFCReportForm() {
   const navigate = useNavigate();
@@ -27,6 +81,31 @@ export default function CFCReportForm() {
   });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Fetch valid devices and issue types from API (optional - can use static list)
+  const { data: validDevices } = useQuery<string[]>({
+    queryKey: ["cfc", "devices"],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("/api/v1/cfc/devices", "GET") as { success?: boolean; data?: string[] };
+        return response?.data || Object.keys(DEVICE_CONFIG);
+      } catch {
+        return Object.keys(DEVICE_CONFIG);
+      }
+    },
+  });
+
+  const { data: validIssueTypes } = useQuery<string[]>({
+    queryKey: ["cfc", "issue-types"],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("/api/v1/cfc/issue-types", "GET") as { success?: boolean; data?: string[] };
+        return response?.data || Object.keys(ISSUE_TYPE_CONFIG);
+      } catch {
+        return Object.keys(ISSUE_TYPE_CONFIG);
+      }
+    },
+  });
 
   const createReportMutation = useMutation({
     mutationFn: async (data: CFCReportFormData) => {
@@ -71,10 +150,20 @@ export default function CFCReportForm() {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Report CFC Issue</h1>
-            <p className="text-gray-300 text-lg">
-              Help us track CFC emissions by reporting issues with your AC or Refrigerator
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">Report CFC Issue</h1>
+                <p className="text-gray-300 text-lg">
+                  Help us track CFC emissions by reporting issues with CFC-containing devices in your daily life
+                </p>
+              </div>
+              <Link to="/cfc/calculator">
+                <Button variant="outline" className="border-emerald-400/20 text-emerald-300 hover:bg-emerald-500/10 rounded-full">
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Calculate Impact
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="glass-card rounded-2xl border border-white/10 shadow-xl">
@@ -115,122 +204,108 @@ export default function CFCReportForm() {
                 {/* Device Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="device" className="text-base font-semibold text-gray-300">Device *</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, device: "AC" })}
-                        className={`w-full p-6 rounded-2xl border-2 transition-all duration-300 text-left ${
-                          formData.device === "AC"
-                            ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/20"
-                            : "border-white/10 hover:border-emerald-400/50 bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            formData.device === "AC" ? "bg-emerald-500 text-white" : "bg-white/5 text-gray-400 border border-white/10"
-                          }`}>
-                            <Wind className="w-6 h-6" />
-                          </div>
-                          <div className={`text-lg font-semibold ${formData.device === "AC" ? "text-white" : "text-gray-300"}`}>AC</div>
-                        </div>
-                        <div className={`text-sm ${formData.device === "AC" ? "text-gray-300" : "text-gray-400"}`}>Air Conditioner</div>
-                      </button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, device: "Refrigerator" })}
-                        className={`w-full p-6 rounded-2xl border-2 transition-all duration-300 text-left ${
-                          formData.device === "Refrigerator"
-                            ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/20"
-                            : "border-white/10 hover:border-emerald-400/50 bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            formData.device === "Refrigerator" ? "bg-emerald-500 text-white" : "bg-white/5 text-gray-400 border border-white/10"
-                          }`}>
-                            <Refrigerator className="w-6 h-6" />
-                          </div>
-                          <div className={`text-lg font-semibold ${formData.device === "Refrigerator" ? "text-white" : "text-gray-300"}`}>Refrigerator</div>
-                        </div>
-                        <div className={`text-sm ${formData.device === "Refrigerator" ? "text-gray-300" : "text-gray-400"}`}>Refrigeration Unit</div>
-                      </button>
-                    </motion.div>
+                  <p className="text-sm text-gray-400 mb-4">Select the CFC-containing device you want to report</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {(validDevices || Object.keys(DEVICE_CONFIG)).map((device) => {
+                      const config = DEVICE_CONFIG[device];
+                      const IconComponent = config?.icon || Package;
+                      const isSelected = formData.device === device;
+                      
+                      return (
+                        <motion.div
+                          key={device}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, device })}
+                            className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+                              isSelected
+                                ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/20"
+                                : "border-white/10 hover:border-emerald-400/50 bg-white/5 hover:bg-white/10"
+                            }`}
+                          >
+                            <div className="flex flex-col items-center gap-2">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                isSelected ? "bg-emerald-500 text-white" : "bg-white/5 text-gray-400 border border-white/10"
+                              }`}>
+                                <IconComponent className="w-5 h-5" />
+                              </div>
+                              <div className={`text-sm font-semibold text-center ${isSelected ? "text-white" : "text-gray-300"}`}>
+                                {device}
+                              </div>
+                              {config && (
+                                <div className={`text-xs text-center ${isSelected ? "text-gray-300" : "text-gray-500"}`}>
+                                  {config.description}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Issue Type Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="issue_type" className="text-base font-semibold text-gray-300">Issue Type *</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, issue_type: "Gas leak" })}
-                        className={`w-full p-5 rounded-2xl border-2 transition-all duration-300 text-left ${
-                          formData.issue_type === "Gas leak"
-                            ? "border-red-500 bg-red-500/10 shadow-lg shadow-red-500/20"
-                            : "border-white/10 hover:border-red-400/50 bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertTriangle className={`w-5 h-5 ${formData.issue_type === "Gas leak" ? "text-red-400" : "text-gray-400"}`} />
-                          <div className={`font-semibold ${formData.issue_type === "Gas leak" ? "text-white" : "text-gray-300"}`}>Gas leak</div>
-                        </div>
-                        <div className={`text-xs ${formData.issue_type === "Gas leak" ? "text-gray-300" : "text-gray-400"}`}>Refrigerant leak detected</div>
-                      </button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, issue_type: "Disposal" })}
-                        className={`w-full p-5 rounded-2xl border-2 transition-all duration-300 text-left ${
-                          formData.issue_type === "Disposal"
-                            ? "border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/20"
-                            : "border-white/10 hover:border-orange-400/50 bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Trash2 className={`w-5 h-5 ${formData.issue_type === "Disposal" ? "text-orange-400" : "text-gray-400"}`} />
-                          <div className={`font-semibold ${formData.issue_type === "Disposal" ? "text-white" : "text-gray-300"}`}>Disposal</div>
-                        </div>
-                        <div className={`text-xs ${formData.issue_type === "Disposal" ? "text-gray-300" : "text-gray-400"}`}>Device disposal/replacement</div>
-                      </button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, issue_type: "Servicing" })}
-                        className={`w-full p-5 rounded-2xl border-2 transition-all duration-300 text-left ${
-                          formData.issue_type === "Servicing"
-                            ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20"
-                            : "border-white/10 hover:border-blue-400/50 bg-white/5 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Wrench className={`w-5 h-5 ${formData.issue_type === "Servicing" ? "text-blue-400" : "text-gray-400"}`} />
-                          <div className={`font-semibold ${formData.issue_type === "Servicing" ? "text-white" : "text-gray-300"}`}>Servicing</div>
-                        </div>
-                        <div className={`text-xs ${formData.issue_type === "Servicing" ? "text-gray-300" : "text-gray-400"}`}>Maintenance/service required</div>
-                      </button>
-                    </motion.div>
+                  <p className="text-sm text-gray-400 mb-4">Select the type of issue or activity</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {(validIssueTypes || Object.keys(ISSUE_TYPE_CONFIG)).map((issueType) => {
+                      const config = ISSUE_TYPE_CONFIG[issueType];
+                      const IconComponent = config?.icon || AlertCircle;
+                      const isSelected = formData.issue_type === issueType;
+                      const colorClasses = {
+                        red: isSelected ? "border-red-500 bg-red-500/10 shadow-lg shadow-red-500/20" : "border-white/10 hover:border-red-400/50 bg-white/5 hover:bg-white/10",
+                        orange: isSelected ? "border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/20" : "border-white/10 hover:border-orange-400/50 bg-white/5 hover:bg-white/10",
+                        blue: isSelected ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20" : "border-white/10 hover:border-blue-400/50 bg-white/5 hover:bg-white/10",
+                        purple: isSelected ? "border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20" : "border-white/10 hover:border-purple-400/50 bg-white/5 hover:bg-white/10",
+                        green: isSelected ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20" : "border-white/10 hover:border-green-400/50 bg-white/5 hover:bg-white/10",
+                        cyan: isSelected ? "border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20" : "border-white/10 hover:border-cyan-400/50 bg-white/5 hover:bg-white/10",
+                        emerald: isSelected ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/20" : "border-white/10 hover:border-emerald-400/50 bg-white/5 hover:bg-white/10",
+                      };
+                      const iconColorClasses = {
+                        red: isSelected ? "text-red-400" : "text-gray-400",
+                        orange: isSelected ? "text-orange-400" : "text-gray-400",
+                        blue: isSelected ? "text-blue-400" : "text-gray-400",
+                        purple: isSelected ? "text-purple-400" : "text-gray-400",
+                        green: isSelected ? "text-green-400" : "text-gray-400",
+                        cyan: isSelected ? "text-cyan-400" : "text-gray-400",
+                        emerald: isSelected ? "text-emerald-400" : "text-gray-400",
+                      };
+                      
+                      return (
+                        <motion.div
+                          key={issueType}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, issue_type: issueType })}
+                            className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left ${
+                              colorClasses[config?.color as keyof typeof colorClasses] || colorClasses.blue
+                            }`}
+                          >
+                            <div className="flex flex-col items-center gap-2">
+                              <IconComponent className={`w-5 h-5 ${
+                                iconColorClasses[config?.color as keyof typeof iconColorClasses] || iconColorClasses.blue
+                              }`} />
+                              <div className={`text-sm font-semibold text-center ${isSelected ? "text-white" : "text-gray-300"}`}>
+                                {issueType}
+                              </div>
+                              {config && (
+                                <div className={`text-xs text-center ${isSelected ? "text-gray-300" : "text-gray-500"}`}>
+                                  {config.description}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
 

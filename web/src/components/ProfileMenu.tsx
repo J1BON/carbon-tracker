@@ -55,8 +55,20 @@ export default function ProfileMenu() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/10 transition-all duration-200 group"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] rounded-xl hover:bg-white/10 active:bg-white/20 transition-all duration-200 group touch-manipulation"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        type="button"
       >
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
           <User className="w-5 h-5 text-white" />
@@ -111,8 +123,10 @@ export default function ProfileMenu() {
             {!user.email_verified && (
               <button
                 onClick={handleResendVerification}
+                onTouchStart={handleResendVerification}
                 disabled={resending}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-yellow-500/10 text-yellow-400 transition-colors duration-200 group disabled:opacity-50"
+                className="w-full flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-lg active:bg-yellow-500/10 text-yellow-400 transition-colors duration-200 group disabled:opacity-50 touch-manipulation"
+                type="button"
               >
                 <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span className="font-semibold">
@@ -122,7 +136,9 @@ export default function ProfileMenu() {
             )}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors duration-200 group"
+              onTouchStart={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-lg active:bg-red-500/10 text-red-400 transition-colors duration-200 group touch-manipulation"
+              type="button"
             >
               <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="font-semibold">Logout</span>

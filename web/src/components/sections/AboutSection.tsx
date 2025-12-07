@@ -8,28 +8,28 @@ export default function AboutSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative py-32 bg-gradient-to-b from-[#1a1a1a] via-[#0f0f0f] to-[#0a0a0a] overflow-hidden">
+    <section ref={ref} className="relative py-16 sm:py-24 md:py-32 bg-gradient-to-b from-[#1a1a1a] via-[#0f0f0f] to-[#0a0a0a] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
           {/* Left: Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
               Empowering change,
               <br />
               <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                 one footprint at a time
               </span>
             </h2>
-            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
               Our mission is to make carbon tracking accessible, intuitive, and impactful.
               We believe that understanding your environmental impact is the first step
               toward creating meaningful change.
             </p>
-            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
               Through advanced tracking, personalized insights, and actionable suggestions,
               we help individuals and communities reduce their carbon footprint and build
               a more sustainable future.
@@ -121,6 +121,11 @@ export default function AboutSection() {
     </section>
   );
 }
+
+
+
+
+
 
 
 

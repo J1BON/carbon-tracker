@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { AlertCircle, Package, Wrench, Plus, Calendar, Info, Trash2, ArrowRight } from "lucide-react";
+import { AlertCircle, Package, Wrench, Plus, Calendar, Info, Trash2, ArrowRight, RefreshCw, Recycle, RotateCcw, ArrowUpCircle, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 
@@ -39,11 +39,21 @@ export default function MyCFCReports() {
   const getIssueIcon = (issueType: string) => {
     switch (issueType) {
       case "Gas leak":
+      case "Improper disposal":
         return <AlertCircle className="w-6 h-6" />;
       case "Disposal":
         return <Trash2 className="w-6 h-6" />;
       case "Servicing":
+      case "Maintenance check":
         return <Wrench className="w-6 h-6" />;
+      case "Replacement":
+        return <RefreshCw className="w-6 h-6" />;
+      case "Recycling":
+        return <Recycle className="w-6 h-6" />;
+      case "Refrigerant recharge":
+        return <RotateCcw className="w-6 h-6" />;
+      case "System upgrade":
+        return <ArrowUpCircle className="w-6 h-6" />;
       default:
         return <Info className="w-6 h-6" />;
     }
@@ -52,11 +62,21 @@ export default function MyCFCReports() {
   const getIssueColor = (issueType: string) => {
     switch (issueType) {
       case "Gas leak":
+      case "Improper disposal":
         return "bg-red-500/10 border-red-400/20";
       case "Disposal":
         return "bg-orange-500/10 border-orange-400/20";
       case "Servicing":
+      case "Maintenance check":
         return "bg-blue-500/10 border-blue-400/20";
+      case "Replacement":
+        return "bg-purple-500/10 border-purple-400/20";
+      case "Recycling":
+        return "bg-green-500/10 border-green-400/20";
+      case "Refrigerant recharge":
+        return "bg-cyan-500/10 border-cyan-400/20";
+      case "System upgrade":
+        return "bg-emerald-500/10 border-emerald-400/20";
       default:
         return "bg-white/5 border-white/10";
     }
@@ -65,11 +85,21 @@ export default function MyCFCReports() {
   const getIssueIconColor = (issueType: string) => {
     switch (issueType) {
       case "Gas leak":
+      case "Improper disposal":
         return "text-red-400";
       case "Disposal":
         return "text-orange-400";
       case "Servicing":
+      case "Maintenance check":
         return "text-blue-400";
+      case "Replacement":
+        return "text-purple-400";
+      case "Recycling":
+        return "text-green-400";
+      case "Refrigerant recharge":
+        return "text-cyan-400";
+      case "System upgrade":
+        return "text-emerald-400";
       default:
         return "text-gray-400";
     }
@@ -90,12 +120,20 @@ export default function MyCFCReports() {
               <h1 className="text-4xl font-bold text-white mb-2">My CFC Reports</h1>
               <p className="text-gray-300 text-lg">View and manage your CFC emission reports</p>
             </div>
-            <Link to="/cfc/report">
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full">
-                <Plus className="w-4 h-4 mr-2" />
-                New Report
-              </Button>
-            </Link>
+            <div className="flex gap-3">
+              <Link to="/cfc/calculator">
+                <Button variant="outline" className="border-emerald-400/20 text-emerald-300 hover:bg-emerald-500/10 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full">
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Calculator
+                </Button>
+              </Link>
+              <Link to="/cfc/report">
+                <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Report
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {isLoading && (

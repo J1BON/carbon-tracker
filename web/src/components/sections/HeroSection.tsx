@@ -35,9 +35,9 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-tight"
+          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 tracking-tight leading-tight px-4"
         >
-          Track your carbon.
+          Know your carbon footprint.
           <br />
           <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
             Save the planet.
@@ -49,9 +49,9 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
         >
-          Understand your environmental impact with intelligent carbon tracking.
+          Understand your environmental impact with intelligent carbon measurement.
           Make informed decisions to reduce your footprint and create a sustainable future.
         </motion.p>
 
@@ -66,9 +66,9 @@ export default function HeroSection() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="group relative px-8 py-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-lg shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/60 transition-all duration-300 flex items-center gap-2"
+              className="group relative px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold text-base sm:text-lg shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/60 transition-all duration-300 flex items-center gap-2 touch-manipulation"
             >
-              Start Tracking
+              Get Started
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </Link>
@@ -76,7 +76,7 @@ export default function HeroSection() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all duration-300"
+              className="px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] rounded-full bg-white/5 backdrop-blur-lg border border-white/10 text-white font-semibold text-base sm:text-lg active:bg-white/10 transition-all duration-300 touch-manipulation"
             >
               Learn More
             </motion.button>

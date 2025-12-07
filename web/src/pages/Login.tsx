@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { validateEmail, validatePassword, validateName, getPasswordStrength } from "@/lib/validation.ts";
+import { Tooltip } from "@/components/ui/tooltip";
 
 interface LoginForm {
   email: string;
@@ -20,6 +22,8 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { setUser, setToken } = useAuthStore();
 
@@ -123,7 +127,7 @@ export default function Login() {
               </div>
             </div>
             <CardTitle className="text-3xl font-black text-center text-white tracking-tight">
-              Carbon Tracker
+              MyCarbonFootprint
             </CardTitle>
             <CardDescription className="text-center text-gray-300 text-base font-medium">
               {isLogin ? "Welcome back" : "Create your account"}
@@ -152,12 +156,37 @@ export default function Login() {
                   type="email"
                   required
                   value={loginForm.email}
-                  onChange={(e) =>
-                    setLoginForm({ ...loginForm, email: e.target.value })
-                  }
-                  className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base"
+                  onChange={(e) => {
+                    const email = e.target.value;
+                    setLoginForm({ ...loginForm, email });
+                    if (touched.email) {
+                      const validation = validateEmail(email);
+                      setFieldErrors(prev => ({
+                        ...prev,
+                        email: validation.isValid ? "" : validation.error || ""
+                      }));
+                    }
+                  }}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, email: true }));
+                    const validation = validateEmail(loginForm.email);
+                    setFieldErrors(prev => ({
+                      ...prev,
+                      email: validation.isValid ? "" : validation.error || ""
+                    }));
+                  }}
+                  className={`h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base min-h-[44px] ${
+                    fieldErrors.email ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   placeholder="you@example.com"
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 />
+                {fieldErrors.email && (
+                  <p id="email-error" className="mt-1 text-sm text-red-400" role="alert">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="password" className="text-sm font-semibold text-gray-300 mb-2 block">
@@ -168,17 +197,42 @@ export default function Login() {
                   type="password"
                   required
                   value={loginForm.password}
-                  onChange={(e) =>
-                    setLoginForm({ ...loginForm, password: e.target.value })
-                  }
-                  className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base"
+                  onChange={(e) => {
+                    const password = e.target.value;
+                    setLoginForm({ ...loginForm, password });
+                    if (touched.password) {
+                      const validation = validatePassword(password);
+                      setFieldErrors(prev => ({
+                        ...prev,
+                        password: validation.isValid ? "" : validation.error || ""
+                      }));
+                    }
+                  }}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, password: true }));
+                    const validation = validatePassword(loginForm.password);
+                    setFieldErrors(prev => ({
+                      ...prev,
+                      password: validation.isValid ? "" : validation.error || ""
+                    }));
+                  }}
+                  className={`h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base min-h-[44px] ${
+                    fieldErrors.password ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   placeholder="••••••••"
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? "password-error" : undefined}
                 />
+                {fieldErrors.password && (
+                  <p id="password-error" className="mt-1 text-sm text-red-400" role="alert">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] text-base tracking-wide" 
-                disabled={loading}
+                className="w-full h-12 min-h-[44px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] text-base tracking-wide" 
+                disabled={loading || !!fieldErrors.email || !!fieldErrors.password}
               >
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
@@ -207,12 +261,37 @@ export default function Login() {
                   type="text"
                   required
                   value={registerForm.name}
-                  onChange={(e) =>
-                    setRegisterForm({ ...registerForm, name: e.target.value })
-                  }
-                  className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base"
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setRegisterForm({ ...registerForm, name });
+                    if (touched.name) {
+                      const validation = validateName(name);
+                      setFieldErrors(prev => ({
+                        ...prev,
+                        name: validation.isValid ? "" : validation.error || ""
+                      }));
+                    }
+                  }}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, name: true }));
+                    const validation = validateName(registerForm.name);
+                    setFieldErrors(prev => ({
+                      ...prev,
+                      name: validation.isValid ? "" : validation.error || ""
+                    }));
+                  }}
+                  className={`h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base min-h-[44px] ${
+                    fieldErrors.name ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   placeholder="John Doe"
+                  aria-invalid={!!fieldErrors.name}
+                  aria-describedby={fieldErrors.name ? "name-error" : undefined}
                 />
+                {fieldErrors.name && (
+                  <p id="name-error" className="mt-1 text-sm text-red-400" role="alert">
+                    {fieldErrors.name}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="reg-email" className="text-sm font-semibold text-gray-300 mb-2 block">
@@ -223,12 +302,37 @@ export default function Login() {
                   type="email"
                   required
                   value={registerForm.email}
-                  onChange={(e) =>
-                    setRegisterForm({ ...registerForm, email: e.target.value })
-                  }
-                  className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base"
+                  onChange={(e) => {
+                    const email = e.target.value;
+                    setRegisterForm({ ...registerForm, email });
+                    if (touched.regEmail) {
+                      const validation = validateEmail(email);
+                      setFieldErrors(prev => ({
+                        ...prev,
+                        regEmail: validation.isValid ? "" : validation.error || ""
+                      }));
+                    }
+                  }}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, regEmail: true }));
+                    const validation = validateEmail(registerForm.email);
+                    setFieldErrors(prev => ({
+                      ...prev,
+                      regEmail: validation.isValid ? "" : validation.error || ""
+                    }));
+                  }}
+                  className={`h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base min-h-[44px] ${
+                    fieldErrors.regEmail ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   placeholder="you@example.com"
+                  aria-invalid={!!fieldErrors.regEmail}
+                  aria-describedby={fieldErrors.regEmail ? "reg-email-error" : undefined}
                 />
+                {fieldErrors.regEmail && (
+                  <p id="reg-email-error" className="mt-1 text-sm text-red-400" role="alert">
+                    {fieldErrors.regEmail}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="reg-password" className="text-sm font-semibold text-gray-300 mb-2 block">
@@ -239,17 +343,62 @@ export default function Login() {
                   type="password"
                   required
                   value={registerForm.password}
-                  onChange={(e) =>
-                    setRegisterForm({ ...registerForm, password: e.target.value })
-                  }
-                  className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base"
+                  onChange={(e) => {
+                    const password = e.target.value;
+                    setRegisterForm({ ...registerForm, password });
+                    if (touched.regPassword) {
+                      const validation = validatePassword(password, true);
+                      setFieldErrors(prev => ({
+                        ...prev,
+                        regPassword: validation.isValid ? "" : validation.error || ""
+                      }));
+                    }
+                  }}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, regPassword: true }));
+                    const validation = validatePassword(registerForm.password, true);
+                    setFieldErrors(prev => ({
+                      ...prev,
+                      regPassword: validation.isValid ? "" : validation.error || ""
+                    }));
+                  }}
+                  className={`h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-emerald-500/20 transition-all duration-200 font-medium text-base min-h-[44px] ${
+                    fieldErrors.regPassword ? "border-red-500 focus:border-red-500" : ""
+                  }`}
                   placeholder="••••••••"
+                  aria-invalid={!!fieldErrors.regPassword}
+                  aria-describedby={fieldErrors.regPassword ? "reg-password-error" : undefined}
                 />
+                {fieldErrors.regPassword && (
+                  <p id="reg-password-error" className="mt-1 text-sm text-red-400" role="alert">
+                    {fieldErrors.regPassword}
+                  </p>
+                )}
+                {registerForm.password && !fieldErrors.regPassword && (
+                  <div className="mt-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${
+                            getPasswordStrength(registerForm.password).strength === "weak"
+                              ? "bg-red-500 w-1/3"
+                              : getPasswordStrength(registerForm.password).strength === "medium"
+                              ? "bg-yellow-500 w-2/3"
+                              : "bg-emerald-500 w-full"
+                          }`}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400 capitalize">
+                        {getPasswordStrength(registerForm.password).strength}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] text-base tracking-wide" 
-                disabled={loading}
+                className="w-full h-12 min-h-[44px] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] text-base tracking-wide" 
+                disabled={loading || !!fieldErrors.name || !!fieldErrors.regEmail || !!fieldErrors.regPassword}
               >
                 {loading ? "Creating account..." : "Create Account"}
               </Button>

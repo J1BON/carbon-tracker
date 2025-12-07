@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,33 +54,95 @@ const CARBON_SEQUESTRATION_DATA = {
   },
 };
 
+interface TreeOption {
+  treeType: string;
+  treeName: string;
+  numTrees: number;
+  years: number;
+  co2PerYear: number;
+  totalCo2Absorbed: number;
+}
+
 export default function TreePlanting() {
-  const [numTrees, setNumTrees] = useState<number>(1);
-  const [treeType, setTreeType] = useState<string>("average");
-  const [years, setYears] = useState<number>(1);
-  const [result, setResult] = useState<{
-    co2Absorbed: number;
-    treesNeeded: number;
-    yearsToOffset: number;
-  } | null>(null);
+  const [searchParams] = useSearchParams();
+  const initialCarbon = searchParams.get("carbon");
+  const [carbonAmount, setCarbonAmount] = useState<number>(initialCarbon ? parseFloat(initialCarbon) : 0);
+  const [treeOptions, setTreeOptions] = useState<TreeOption[]>([]);
+  const [showCalculator, setShowCalculator] = useState<boolean>(!initialCarbon);
+
+  // Auto-calculate if carbon amount is provided via URL
+  useEffect(() => {
+    if (initialCarbon && parseFloat(initialCarbon) > 0) {
+      const amount = parseFloat(initialCarbon);
+      setCarbonAmount(amount);
+      // Calculate after a brief delay to ensure state is set
+      setTimeout(() => {
+        calculateTreeOptionsWithAmount(amount);
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCarbon]);
 
   const heroAnimation = useScrollAnimation({ threshold: 0.2, triggerOnce: true });
   const impactAnimation = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
   const calculatorAnimation = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
 
-  const calculateImpact = () => {
-    const selectedTree = CARBON_SEQUESTRATION_DATA.tree_types[treeType as keyof typeof CARBON_SEQUESTRATION_DATA.tree_types];
-    const co2PerYear = selectedTree.co2_per_year;
-    const co2Absorbed = (co2PerYear * numTrees * years);
+  // Calculate multiple tree planting options based on carbon amount
+  const calculateTreeOptionsWithAmount = (amount: number) => {
+    if (amount <= 0) {
+      setTreeOptions([]);
+      return;
+    }
+
+    const options: TreeOption[] = [];
+    const treeEntries = Object.entries(CARBON_SEQUESTRATION_DATA.tree_types).filter(([key]) => key !== "average");
     
-    setResult({
-      co2Absorbed: Math.round(co2Absorbed * 100) / 100,
-      treesNeeded: Math.ceil(1000 / co2PerYear), // Trees needed to offset 1 tonne CO2
-      yearsToOffset: Math.ceil(1000 / (co2PerYear * numTrees)), // Years to offset 1 tonne
+    // Generate multiple options for each tree type with different year combinations
+    treeEntries.forEach(([key, tree]) => {
+      // Option 1: Calculate for 1-10 years, finding reasonable tree counts
+      for (let years = 1; years <= 10; years++) {
+        const treesNeeded = Math.ceil(carbonAmount / (tree.co2_per_year * years));
+        if (treesNeeded > 0 && treesNeeded <= 100) { // Reasonable range
+          const totalCo2Absorbed = treesNeeded * tree.co2_per_year * years;
+          if (totalCo2Absorbed >= carbonAmount * 0.9) { // At least 90% of carbon offset
+            options.push({
+              treeType: key,
+              treeName: tree.name,
+              numTrees: treesNeeded,
+              years: years,
+              co2PerYear: tree.co2_per_year,
+              totalCo2Absorbed: Math.round(totalCo2Absorbed * 100) / 100,
+            });
+          }
+        }
+      }
     });
+
+    // Sort by number of trees (ascending), then by years (ascending)
+    options.sort((a, b) => {
+      if (a.numTrees !== b.numTrees) return a.numTrees - b.numTrees;
+      return a.years - b.years;
+    });
+
+    // Take top 12 diverse options (mix of different trees and year combinations)
+    const selectedOptions: TreeOption[] = [];
+    const seenCombinations = new Set<string>();
+    
+    for (const option of options) {
+      const key = `${option.treeType}-${option.numTrees}-${option.years}`;
+      if (!seenCombinations.has(key) && selectedOptions.length < 12) {
+        seenCombinations.add(key);
+        selectedOptions.push(option);
+      }
+    }
+
+    setTreeOptions(selectedOptions);
+    setShowCalculator(false);
   };
 
-  const selectedTree = CARBON_SEQUESTRATION_DATA.tree_types[treeType as keyof typeof CARBON_SEQUESTRATION_DATA.tree_types];
+  const calculateTreeOptions = () => {
+    calculateTreeOptionsWithAmount(carbonAmount);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] flex flex-col">
@@ -209,118 +272,127 @@ export default function TreePlanting() {
           <div className="flex items-center gap-3 mb-8">
             <Calculator className="w-8 h-8 text-emerald-400" />
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">
-              Tree Impact Calculator
+              Tree Planting Calculator
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
-            {/* Calculator Form */}
-            <div className="glass-card rounded-2xl border border-white/10 p-6">
-              <h3 className="text-2xl font-semibold text-white mb-6">Calculate Your Impact</h3>
-              <div className="space-y-6">
-                <div>
-                  <Label htmlFor="treeType" className="text-sm font-semibold text-gray-300 mb-2 block">
-                    Tree Type
-                  </Label>
-                  <select
-                    id="treeType"
-                    value={treeType}
-                    onChange={(e) => setTreeType(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/5 text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+          {showCalculator ? (
+            <div className="max-w-2xl mx-auto">
+              <div className="glass-card rounded-2xl border border-white/10 p-6 mb-6">
+                <h3 className="text-2xl font-semibold text-white mb-6">Calculate Trees Needed</h3>
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="carbonAmount" className="text-sm font-semibold text-gray-300 mb-2 block">
+                      Carbon Amount (kg CO₂)
+                    </Label>
+                    <Input
+                      id="carbonAmount"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={carbonAmount || ""}
+                      onChange={(e) => setCarbonAmount(parseFloat(e.target.value) || 0)}
+                      placeholder="e.g., 300"
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-500"
+                    />
+                    <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                      Enter the amount of carbon (in kg CO₂) you want to offset. This can be from your carbon calculator results.
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={calculateTreeOptions}
+                    disabled={carbonAmount <= 0}
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full py-6 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {Object.entries(CARBON_SEQUESTRATION_DATA.tree_types).map(([key, tree]) => (
-                      <option key={key} value={key} className="bg-gray-900">
-                        {tree.name} - {tree.co2_per_year} kg CO2/year
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-                    {selectedTree.description}
+                    Calculate Tree Options
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-semibold text-white mb-2">
+                    Tree Planting Options for {carbonAmount} kg CO₂
+                  </h3>
+                  <p className="text-gray-400">
+                    Choose from multiple options to offset your carbon footprint
                   </p>
                 </div>
-
-                <div>
-                  <Label htmlFor="numTrees" className="text-sm font-semibold text-gray-300 mb-2 block">
-                    Number of Trees
-                  </Label>
-                  <Input
-                    id="numTrees"
-                    type="number"
-                    min="1"
-                    value={numTrees || ""}
-                    onChange={(e) => setNumTrees(parseInt(e.target.value) || 1)}
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="years" className="text-sm font-semibold text-gray-300 mb-2 block">
-                    Years
-                  </Label>
-                  <Input
-                    id="years"
-                    type="number"
-                    min="1"
-                    value={years || ""}
-                    onChange={(e) => setYears(parseInt(e.target.value) || 1)}
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500"
-                  />
-                </div>
-
-                <Button 
-                  onClick={calculateImpact}
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full py-6 text-base font-medium"
+                <Button
+                  onClick={() => {
+                    setShowCalculator(true);
+                    setTreeOptions([]);
+                    setCarbonAmount(0);
+                  }}
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
                 >
-                  Calculate Impact
+                  Calculate Again
                 </Button>
               </div>
-            </div>
 
-            {/* Results */}
-            <div className="glass-card rounded-2xl border border-white/10 p-6">
-              <h3 className="text-2xl font-semibold text-white mb-6">Your Impact</h3>
-              <div className="space-y-6">
-                {result ? (
-                  <>
-                    <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-6">
-                      <p className="text-sm text-gray-300 mb-2">Total CO2 Absorbed</p>
-                      <p className="text-4xl font-semibold text-white mb-1">
-                        {result.co2Absorbed} kg
-                      </p>
-                      <p className="text-sm text-gray-300">
-                        Over {years} {years === 1 ? "year" : "years"}
-                      </p>
+              {treeOptions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {treeOptions.map((option, index) => (
+                    <div
+                      key={index}
+                      className="glass-card rounded-2xl border border-white/10 p-6 hover:border-emerald-400/30 transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center">
+                          <TreePine className="w-6 h-6 text-emerald-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white">{option.treeName}</h4>
+                          <p className="text-xs text-gray-400">{option.co2PerYear} kg CO₂/year</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-lg p-4">
+                          <p className="text-sm text-gray-300 mb-1">Plant</p>
+                          <p className="text-2xl font-bold text-white">
+                            {option.numTrees} {option.numTrees === 1 ? "tree" : "trees"}
+                          </p>
+                          <p className="text-sm text-gray-300 mt-2">
+                            for <span className="font-semibold text-white">{option.years}</span> {option.years === 1 ? "year" : "years"}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Total CO₂ Absorbed</p>
+                          <p className="text-lg font-semibold text-white">
+                            {option.totalCo2Absorbed} kg
+                          </p>
+                        </div>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-400">No options found. Please try a different carbon amount.</p>
+                </div>
+              )}
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                        <span className="text-gray-300">Trees to offset 1 tonne:</span>
-                        <span className="font-semibold text-white">{result.treesNeeded} trees</span>
-                      </div>
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                        <span className="text-gray-300">Years to offset 1 tonne:</span>
-                        <span className="font-semibold text-white">{result.yearsToOffset} years</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-gray-300 leading-relaxed">
-                          Based on {selectedTree.name} data: {selectedTree.co2_per_year} kg CO2 per year per tree.
-                          This calculation uses verified data from EPA and Arbor Day Foundation.
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-gray-400">Enter values and click "Calculate Impact" to see your results</p>
+              <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-6 mt-8">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-300 leading-relaxed mb-2">
+                      <strong className="text-white">How it works:</strong> Based on your carbon amount, we calculate multiple tree planting options. Each option shows how many trees you need to plant and for how many years to offset your carbon footprint.
+                    </p>
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      All calculations use verified data from Bangladesh Forest Research Institute and international sources. Trees native to Bangladesh are prioritized.
+                    </p>
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* How Trees Help Section */}
@@ -383,4 +455,5 @@ export default function TreePlanting() {
     </div>
   );
 }
+
 

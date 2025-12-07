@@ -11,7 +11,7 @@ import os
 
 class Settings(BaseSettings):
     # App settings
-    PROJECT_NAME: str = "Carbon Tracker API"
+    PROJECT_NAME: str = "MyCarbonFootprint API"
     VERSION: str = "0.1.0"
     DEBUG: bool = False
     
@@ -58,10 +58,10 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "noreply@carbontracker.com"
-    SMTP_FROM_NAME: str = "Carbon Tracker"
+    SMTP_FROM_NAME: str = "MyCarbonFootprint"
     
     # Alternative: Resend API (https://resend.com)
-    RESEND_API_KEY: str = ""
+    RESEND_API_KEY: str = Field(default="", description="Resend API key for email sending")
     
     # Frontend URL for email links
     FRONTEND_URL: str = "http://localhost:3000"

@@ -52,31 +52,31 @@ export default function About() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden"
+        className="relative py-16 sm:py-24 md:py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight px-4"
           >
-            About Carbon Tracker
+            About MyCarbonFootprint
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
           >
             Empowering individuals to understand and reduce their carbon footprint through 
-            innovative tracking, gamification, and sustainable practices.
+            innovative measurement, gamification, and sustainable practices.
           </motion.p>
         </div>
       </section>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 space-y-32">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 lg:py-24 space-y-16 sm:space-y-24 md:space-y-32">
         {/* Mission Section */}
         <section 
           ref={missionRef}
@@ -91,8 +91,8 @@ export default function About() {
               Our Mission
             </h2>
             <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-              At Carbon Tracker, we believe that every individual action matters in the fight against 
-              climate change. Our mission is to make carbon footprint tracking accessible, engaging, 
+              At MyCarbonFootprint, we believe that every individual action matters in the fight against 
+              climate change. Our mission is to make carbon footprint measurement accessible, engaging, 
               and actionable for everyone.
             </p>
             <p className="text-lg text-gray-300 mb-6 leading-relaxed">
@@ -197,9 +197,9 @@ export default function About() {
               <div className="w-16 h-16 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center mx-auto mb-6">
                 <span className="text-3xl">📊</span>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Carbon Tracking</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Carbon Measurement</h3>
               <p className="text-gray-300 leading-relaxed">
-                Comprehensive tracking of your carbon footprint across transport, diet, energy, 
+                Comprehensive measurement of your carbon footprint across transport, diet, energy, 
                 shopping, and lifestyle activities.
               </p>
             </motion.div>
@@ -249,7 +249,7 @@ export default function About() {
               Ready to Get Started?
             </h2>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of users who are already tracking their carbon footprint and 
+              Join thousands of users who are already measuring their carbon footprint and 
               making a positive impact on the environment.
             </p>
             <Link to="/">

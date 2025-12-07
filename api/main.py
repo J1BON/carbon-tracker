@@ -1,19 +1,22 @@
 """
-Carbon Tracker API - Main FastAPI application
+MyCarbonFootprint API - Main FastAPI application
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
+import os
+from sqlalchemy import text
 
 from app.config import settings
+from app.database import engine
 from app.routers import health, auth, carbon, gamification, recycling, cfc, admin
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Carbon Tracker API",
-    description="Personal Carbon Footprint Tracker API",
+    title="MyCarbonFootprint API",
+    description="MyCarbonFootprint - Track and Reduce Your Personal Carbon Footprint API",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -30,9 +33,10 @@ if not isinstance(cors_origins, list):
         "http://127.0.0.1:5173",
     ]
 
-# Add Netlify URL if not already present
-netlify_url = "https://personalcarbontracker.netlify.app"
-if netlify_url not in cors_origins:
+# Add Netlify URL from environment variable if set
+# This allows you to change the domain without code changes
+netlify_url = os.getenv("NETLIFY_URL", "https://personalcarbontracker.netlify.app")
+if netlify_url and netlify_url not in cors_origins:
     cors_origins.append(netlify_url)
 
 app.add_middleware(
@@ -43,6 +47,31 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+# Check database tables on startup
+@app.on_event("startup")
+async def check_database():
+    """Check if database tables exist"""
+    try:
+        with engine.connect() as conn:
+            # Check if users table exists
+            if settings.DATABASE_URL.startswith("sqlite"):
+                result = conn.execute(text(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+                ))
+            else:
+                result = conn.execute(text(
+                    "SELECT table_name FROM information_schema.tables WHERE table_name='users'"
+                ))
+            table_exists = result.fetchone() is not None
+            
+            if not table_exists:
+                print("⚠️  WARNING: Database tables not found!")
+                print("⚠️  Run migrations: alembic upgrade head")
+                print("⚠️  Or: python -m alembic upgrade head")
+    except Exception as e:
+        print(f"⚠️  Database check failed: {e}")
+        print("⚠️  Make sure database is running and migrations are applied")
 
 # Register routers
 app.include_router(health.router, tags=["health"])
@@ -72,11 +101,35 @@ async def global_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """Startup tasks"""
-    print("🌱 Carbon Tracker API starting up...")
+    print("🌱 MyCarbonFootprint API starting up...")
     
     # Create tables if they don't exist (for SQLite - skip migrations)
     from app.config import settings
+    from app.database import engine
+    from sqlalchemy import text, inspect
+    
     print(f"📊 DATABASE_URL: {settings.DATABASE_URL}")
+    
+    # Check if database tables exist (for PostgreSQL)
+    if not settings.DATABASE_URL.startswith("sqlite"):
+        try:
+            with engine.connect() as conn:
+                # Check if users table exists
+                result = conn.execute(text(
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='users'"
+                ))
+                table_exists = result.fetchone() is not None
+                
+                if not table_exists:
+                    print("⚠️  WARNING: Database tables not found!")
+                    print("⚠️  Run migrations: cd api && alembic upgrade head")
+                    print("⚠️  Or: cd api && python -m alembic upgrade head")
+                    print("⚠️  Registration will fail until migrations are run!")
+                else:
+                    print("✅ Database tables found")
+        except Exception as e:
+            print(f"⚠️  Could not check database tables: {e}")
+            print("⚠️  Make sure database is running and accessible")
     
     if settings.DATABASE_URL.startswith("sqlite"):
         try:
@@ -136,7 +189,7 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Shutdown tasks"""
-    print("🌱 Carbon Tracker API shutting down...")
+    print("🌱 MyCarbonFootprint API shutting down...")
 
 
 if __name__ == "__main__":

@@ -45,14 +45,14 @@ export default function Contact() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden"
+        className="relative py-16 sm:py-24 md:py-32 bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight px-4"
           >
             Get in Touch
           </motion.h1>
@@ -60,7 +60,7 @@ export default function Contact() {
             initial={{ opacity: 0, y: 30 }}
             animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
           >
             Have questions or feedback? We'd love to hear from you. 
             Reach out to us and we'll get back to you as soon as possible.
@@ -69,8 +69,8 @@ export default function Contact() {
       </section>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
           {/* Contact Information */}
           <div className="space-y-8">
             <motion.div
@@ -97,8 +97,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white mb-1">Email</h3>
-                  <p className="text-gray-300 text-sm">info@carbontracker.com</p>
-                  <p className="text-gray-300 text-sm">support@carbontracker.com</p>
+                  <p className="text-gray-300 text-sm">info@mycarbonfootprint.com</p>
+                  <p className="text-gray-300 text-sm">support@mycarbonfootprint.com</p>
                 </div>
               </div>
             </motion.div>
@@ -191,7 +191,7 @@ export default function Contact() {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-400/50 focus:ring-emerald-400/50"
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-400/50 focus:ring-emerald-400/50 min-h-[44px] text-base"
                       placeholder="Your name"
                     />
                   </div>
@@ -205,7 +205,7 @@ export default function Contact() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-400/50 focus:ring-emerald-400/50"
+                      className="bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-emerald-400/50 focus:ring-emerald-400/50 min-h-[44px] text-base"
                       placeholder="your.email@example.com"
                     />
                   </div>
@@ -236,7 +236,7 @@ export default function Contact() {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={6}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all resize-none"
+                    className="w-full px-4 py-3 min-h-[120px] rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all resize-none text-base"
                     placeholder="Tell us what's on your mind..."
                   />
                 </div>
@@ -244,7 +244,7 @@ export default function Contact() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-6 text-lg font-bold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/60 transition-all duration-200 disabled:opacity-50"
+                  className="w-full py-4 sm:py-6 min-h-[44px] text-base sm:text-lg font-bold bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/60 transition-all duration-200 disabled:opacity-50 touch-manipulation"
                 >
                   {loading ? (
                     "Sending..."

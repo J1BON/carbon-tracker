@@ -4,11 +4,16 @@ import { apiRequest } from "@/lib/api.ts";
 import CarbonCalculator from "@/components/CarbonCalculator";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ActionableRecommendations from "@/components/ActionableRecommendations";
+import ImpactVisualization from "@/components/ImpactVisualization";
 import { formatCarbonAmount } from "@/lib/utils.ts";
 import { exportActivityToPDF } from "@/lib/pdfExport.ts";
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton, SkeletonCard, SkeletonChart, SkeletonList } from "@/components/ui/skeleton";
+import EmptyState from "@/components/EmptyState";
+import { Tooltip } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
@@ -27,21 +32,24 @@ import {
   Sparkles,
   Package,
   BarChart3,
-  LineChart,
+  LineChart as LineChartIcon,
   Activity,
   type LucideIcon,
 } from "lucide-react";
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   PieChart,
   Pie,
   Cell,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as ChartTooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
 const COLORS = ["#4CAF50", "#00BCD4", "#FF9800", "#9C27B0", "#F44336"];
@@ -61,6 +69,12 @@ interface CarbonStats {
   daily_average_kg: number;
   monthly_kg: number;
   by_category: Record<string, number>;
+  equivalents?: {
+    car_km: number;
+    trees_needed: number;
+    bangladeshi_days: number;
+    household_days: number;
+  };
 }
 
 const CATEGORY_CONFIG: Record<string, {
@@ -219,6 +233,40 @@ export default function Dashboard() {
     },
   });
 
+  // Fetch actionable recommendations
+  const { data: recommendationsData, isLoading: recommendationsLoading } = useQuery({
+    queryKey: ["carbon", "recommendations"],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("/api/v1/carbon/recommendations?days=30", "GET") as { success?: boolean; data?: any };
+        if (response && typeof response === 'object' && 'data' in response) {
+          return (response as { data: any }).data;
+        }
+        return null;
+      } catch (error) {
+        console.error("Failed to fetch recommendations:", error);
+        return null;
+      }
+    },
+  });
+
+  // Fetch impact visualization
+  const { data: impactData, isLoading: impactLoading } = useQuery({
+    queryKey: ["carbon", "impact"],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("/api/v1/carbon/impact?days=30", "GET") as { success?: boolean; data?: any };
+        if (response && typeof response === 'object' && 'data' in response) {
+          return (response as { data: any }).data;
+        }
+        return null;
+      } catch (error) {
+        console.error("Failed to fetch impact data:", error);
+        return null;
+      }
+    },
+  });
+
   const logs: CarbonLog[] = Array.isArray(logsData) ? logsData : [];
 
   const filteredAndSortedLogs = useMemo(() => {
@@ -266,7 +314,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-[#1a1a1a] flex flex-col pt-16">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-12 flex-1">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 space-y-6 sm:space-y-8 md:space-y-12 flex-1 overflow-x-hidden">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -287,31 +335,42 @@ export default function Dashboard() {
             </p>
           </motion.div>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard
-              title="Total Footprint"
-              value={statsLoading ? "..." : formatCarbonAmount(stats?.total_kg || 0)}
-              subtitle="CO₂ equivalent"
-              icon={TrendingUp}
-              color="from-green-500 to-green-600"
-              delay={0}
-            />
-            <StatCard
-              title="Monthly Total"
-              value={statsLoading ? "..." : formatCarbonAmount(stats?.monthly_kg || 0)}
-              subtitle="This month"
-              icon={Calendar}
-              color="from-blue-500 to-blue-600"
-              delay={0.1}
-            />
-            <StatCard
-              title="Daily Average"
-              value={statsLoading ? "..." : formatCarbonAmount(stats?.daily_average_kg || 0)}
-              subtitle="Last 30 days"
-              icon={Zap}
-              color="from-yellow-500 to-orange-600"
-              delay={0.2}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {statsLoading ? (
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                <StatCard
+                  title="Total Footprint"
+                  value={formatCarbonAmount(stats?.total_kg || 0)}
+                  subtitle="CO₂ equivalent"
+                  icon={TrendingUp}
+                  color="from-green-500 to-green-600"
+                  delay={0}
+                />
+                <StatCard
+                  title="Monthly Total"
+                  value={formatCarbonAmount(stats?.monthly_kg || 0)}
+                  subtitle="This month"
+                  icon={Calendar}
+                  color="from-blue-500 to-blue-600"
+                  delay={0.1}
+                />
+                <StatCard
+                  title="Daily Average"
+                  value={formatCarbonAmount(stats?.daily_average_kg || 0)}
+                  subtitle="Last 30 days"
+                  icon={Zap}
+                  color="from-yellow-500 to-orange-600"
+                  delay={0.2}
+                />
+              </>
+            )}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -380,7 +439,7 @@ export default function Dashboard() {
           </div>
 
           {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, x: -20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -429,7 +488,7 @@ export default function Dashboard() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip 
+                        <ChartTooltip 
                           contentStyle={{ 
                             backgroundColor: 'rgba(0,0,0,0.95)', 
                             border: '1px solid rgba(255,255,255,0.2)', 
@@ -477,7 +536,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
-                      <LineChart className="w-6 h-6 text-blue-400" />
+                      <LineChartIcon className="w-6 h-6 text-blue-400" />
                     </div>
                   </div>
                 </div>
@@ -499,7 +558,7 @@ export default function Dashboard() {
                           tickLine={false} 
                           tick={{ fill: '#9ca3af' }} 
                         />
-                        <Tooltip 
+                        <ChartTooltip 
                           contentStyle={{ 
                             backgroundColor: 'rgba(0,0,0,0.95)', 
                             border: '1px solid rgba(255,255,255,0.2)', 
@@ -523,7 +582,7 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   ) : (
                     <div className="h-[320px] flex flex-col items-center justify-center text-gray-400">
-                      <LineChart className="w-16 h-16 mb-4 opacity-50" />
+                      <LineChartIcon className="w-16 h-16 mb-4 opacity-50" />
                       <p className="text-sm font-semibold text-gray-400">No data available yet</p>
                     </div>
                   )}
@@ -532,9 +591,123 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
+          {/* Trends Line Chart */}
+          {logs && logs.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="mb-8"
+            >
+              <div className="rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.3)]">
+                <div className="pb-4 p-6 border-b border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+                        Carbon Footprint Trends
+                      </h3>
+                      <p className="text-sm text-gray-400 font-medium">
+                        Your emissions over the last 30 days
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                      <LineChartIcon className="w-6 h-6 text-purple-400" />
+                    </div>
+                  </div>
+                </div>
+                <div className="pb-8 px-6 pt-6">
+                  {statsLoading ? (
+                    <SkeletonChart />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={(() => {
+                      // Group logs by date for last 30 days
+                      const today = new Date();
+                      const dateMap: Record<string, number> = {};
+                      
+                      // Initialize last 30 days with 0
+                      for (let i = 29; i >= 0; i--) {
+                        const date = new Date(today);
+                        date.setDate(date.getDate() - i);
+                        const dateStr = date.toISOString().split('T')[0];
+                        dateMap[dateStr] = 0;
+                      }
+                      
+                      // Sum emissions by date
+                      logs.forEach(log => {
+                        const logDate = new Date(log.created_at).toISOString().split('T')[0];
+                        if (dateMap.hasOwnProperty(logDate)) {
+                          dateMap[logDate] += log.carbon_amount_kg;
+                        }
+                      });
+                      
+                      // Convert to array format
+                      return Object.entries(dateMap).map(([date, value]) => ({
+                        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                        emissions: Math.round(value * 100) / 100,
+                      }));
+                    })()}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" strokeOpacity={0.3} />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="#9ca3af" 
+                        fontSize={10} 
+                        tickLine={false} 
+                        tick={{ fill: '#9ca3af' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis 
+                        stroke="#9ca3af" 
+                        fontSize={11} 
+                        tickLine={false} 
+                        tick={{ fill: '#9ca3af' }}
+                        label={{ value: 'kg CO₂', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#9ca3af' } }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0,0,0,0.95)', 
+                          border: '1px solid rgba(255,255,255,0.2)', 
+                          borderRadius: '12px',
+                          backdropFilter: 'blur(20px)',
+                          padding: '12px',
+                          color: '#ffffff'
+                        }} 
+                        itemStyle={{ color: '#ffffff' }}
+                        labelStyle={{ color: '#ffffff' }}
+                        formatter={(value: any) => [formatCarbonAmount(value), 'Emissions']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="emissions" 
+                        stroke="#10b981" 
+                        strokeWidth={3}
+                        dot={{ fill: '#10b981', r: 4 }}
+                        activeDot={{ r: 6, fill: '#10b981' }}
+                        animationDuration={1000}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Carbon Calculator */}
-          <div className="mb-6">
+          <div className="mb-6 w-full max-w-full overflow-x-hidden" data-calculator>
             <CarbonCalculator />
+          </div>
+
+          {/* Impact Visualization - Real-World Equivalents */}
+          <div className="mb-6">
+            <ImpactVisualization data={impactData || null} loading={impactLoading} />
+          </div>
+
+          {/* Actionable Recommendations - Personalized Tips */}
+          <div className="mb-6">
+            <ActionableRecommendations data={recommendationsData || null} loading={recommendationsLoading} />
           </div>
 
           {/* Activity Logs */}
@@ -732,13 +905,23 @@ export default function Dashboard() {
                     </AnimatePresence>
                   </div>
                 ) : (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center mx-auto mb-6 shadow-inner">
-                      <Activity className="w-10 h-10 text-gray-400" />
-                    </div>
-                    <p className="text-gray-300 text-sm font-semibold mb-1">No activity yet</p>
-                    <p className="text-gray-500 text-xs font-medium">Start tracking your carbon footprint</p>
-                  </div>
+                  <EmptyState
+                    icon={
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/20 flex items-center justify-center">
+                        <Activity className="w-12 h-12 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                    }
+                    title="No activities yet"
+                    description="Start tracking your carbon footprint by logging your daily activities. Use the calculator above to get started!"
+                    action={{
+                      label: "Calculate Carbon Footprint",
+                      onClick: () => {
+                        const calculatorElement = document.querySelector('[data-calculator]');
+                        calculatorElement?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="border-white/10 bg-white/5"
+                  />
                 )}
 
                 {/* Pagination */}
